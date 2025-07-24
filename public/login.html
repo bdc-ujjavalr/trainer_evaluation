@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Form System</title>
+  <style>
+    body {
+      background: #bfd5f3;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .header {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .logo { width: 150px; height: auto; }
+    .login-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 30px;
+      width: 350px;
+    }
+    .login-container h2 {
+      margin-top: 0;
+      color: #333;
+      text-align: center;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .button {
+      background: #4a80d5;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 4px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .button:hover { background: #3a6fc4; }
+    .error-message {
+      color: #d9534f;
+      margin-bottom: 15px;
+      text-align: center;
+      display: none; /* Keep hidden by default */
+    }
+    @media (max-width: 768px) {
+      .login-container { width: 70%; max-width: 350px; }
+      .logo { width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img class="logo"
+         src="https://s3.ap-south-1.amazonaws.com/bluedataconsulting.co/Logo+Images/BDC+logo.png"
+         alt="Company Logo">
+  </div>
+
+  <div class="login-container">
+    <h2>Login</h2>
+    <div id="errorContainer" class="error-message">
+      </div>
+    <form action="/trainer_evaluation/login" method="POST">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+
+      <button type="submit" class="button">Log In</button>
+    </form>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const errorParam = params.get('error');
+    const errorContainer = document.getElementById('errorContainer');
+    
+    if (errorParam) {
+      let errorMessage = "An unknown error occurred.";
+      if (errorParam === 'invalid_credentials') {
+        errorMessage = 'Invalid username or password.';
+      } else if (errorParam === 'credentials_missing') {
+        errorMessage = 'Please enter both username and password.';
+      } else if (errorParam === 'session_error') {
+        errorMessage = 'There was a problem with your session. Please try again.';
+      } else if (errorParam === 'server_error') {
+        errorMessage = 'A server error occurred. Please try again later.';
+      }
+      errorContainer.textContent = decodeURIComponent(errorMessage.replace(/\+/g, ' '));
+      errorContainer.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

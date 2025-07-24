@@ -3,22 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home - Dashboard</title>
+    <title>Create Organization</title>
     <style>
-      /* General Styles */
       * {
         box-sizing: border-box;
       }
       body {
         margin: 0;
         font-family: Arial, sans-serif;
-        background-color: #bfd5f3;
+        background: #bfd5f3;
         display: flex;
         flex-direction: column;
         min-height: 100vh;
       }
-
-      /* Header and Logo */
       .header {
         background: #fff;
         padding: 15px 30px;
@@ -34,8 +31,6 @@
         width: 150px;
         height: auto;
       }
-
-      /* Desktop Navigation */
       .navbar {
         display: flex;
         align-items: center;
@@ -52,14 +47,12 @@
         text-decoration: underline;
       }
       .user-profile {
-        margin-left: 15px;
+        margin-left: 20px;
         color: #1a237e;
         font-weight: bold;
         font-size: 15px;
         padding: 5px 0;
       }
-
-      /* Mobile Menu Toggle Button - Hidden by default */
       .menu-toggle {
         display: none;
         cursor: pointer;
@@ -73,56 +66,82 @@
         fill: #1a237e;
       }
       #close-icon {
-        display: none; /* Hide close icon by default */
+        display: none;
       }
-
-      /* Main Content Area */
       .main-content {
         flex: 1;
-        position: relative;
-      }
-      #welcomeMessage {
-        display: none;
-        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         padding: 40px 20px;
-        font-size: 24px;
-        color: #333;
+      }
+      .container {
         background: #fff;
-        margin: 20px auto;
-        border-radius: 12px;
+        padding: 30px 25px;
+        border-radius: 10px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         max-width: 400px;
-        width: calc(100% - 40px);
-      }
-      #dashboardWrapper {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-      }
-      #dashboardFrame {
         width: 100%;
-        height: 100%;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #1e1e1e;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+        font-weight: bold;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      .button {
+        background: #4a80d5;
+        color: #fff;
         border: none;
+        padding: 12px;
+        width: 100%;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .button:hover {
+        background: #3a6fc4;
+      }
+      .message {
+        text-align: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 4px;
+        display: none;
+        font-size: 14px;
+      }
+      .error {
+        background: #f8d7da;
+        color: #842029;
+      }
+      .success {
+        background: #d1e7dd;
+        color: #0f5132;
       }
 
-      /* Responsive Styles for Tablet and Mobile */
       @media (max-width: 992px) {
-        /* Show the menu toggle button */
         .menu-toggle {
           display: block;
         }
-
-        .header {
-          padding: 1rem;
-        }
-
-        /* Hide the original navbar and style it as a dropdown */
         .navbar {
-          display: none; /* Hide by default */
+          display: none;
           position: absolute;
-          top: 100%; /* Position it right below the header */
+          top: 100%;
           left: 0;
           right: 0;
           width: 100%;
@@ -132,13 +151,9 @@
           padding: 15px 0;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        /* 'active' class will be toggled by JS to show the menu */
         .navbar.active {
           display: flex;
         }
-
-        /* Adjust link spacing for vertical layout */
         .navbar a,
         .user-profile {
           margin: 10px 0;
@@ -156,20 +171,16 @@
         src="https://s3.ap-south-1.amazonaws.com/bluedataconsulting.co/Logo+Images/BDC+logo.png"
         alt="Blue Data Consulting Logo"
       />
-      <!-- Mobile Menu Button -->
       <button class="menu-toggle" aria-label="Toggle navigation menu">
-        <!-- Hamburger Icon -->
         <svg id="menu-icon" viewBox="0 0 24 24">
           <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
         </svg>
-        <!-- Close (X) Icon -->
         <svg id="close-icon" viewBox="0 0 24 24">
           <path
             d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
           ></path>
         </svg>
       </button>
-
       <div class="navbar" id="navbar-links">
         <a href="/trainer_evaluation/">Home</a>
         <a href="/trainer_evaluation/organizations-dashboard" id="orgLink"
@@ -192,49 +203,89 @@
         <a href="/trainer_evaluation/logout">Logout</a>
       </div>
     </div>
+
     <div class="main-content">
-      <div id="welcomeMessage">Welcome to the Dashboard</div>
-      <div id="dashboardWrapper">
-        <iframe
-          id="dashboardFrame"
-          src="/trainer_evaluation/dashboard.html"
-          title="Training Dashboard"
-        ></iframe>
+      <div class="container">
+        <h2>Create Organization</h2>
+        <div id="message" class="message"></div>
+        <form action="/trainer_evaluation/create-organization" method="POST">
+          <div class="form-group">
+            <label for="name">Organization Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Enter organization name"
+              required
+            />
+          </div>
+          <button type="submit" class="button">Create Organization</button>
+        </form>
       </div>
     </div>
+
     <script>
-      // --- Session Info Logic ---
-      fetch("/trainer_evaluation/session-info")
-        .then((r) => r.json())
+      // --- Page Specific Logic ---
+      const basePath = "/trainer_evaluation";
+      const params = new URLSearchParams(window.location.search);
+      const msgEl = document.getElementById("message");
+      if (params.has("error")) {
+        msgEl.textContent = decodeURIComponent(
+          params.get("error").replace(/\+/g, " ")
+        );
+        msgEl.classList.add("error");
+        msgEl.style.display = "block";
+      } else if (params.has("success")) {
+        msgEl.textContent = decodeURIComponent(
+          params.get("success").replace(/\+/g, " ")
+        );
+        msgEl.classList.add("success");
+        msgEl.style.display = "block";
+      }
+
+      fetch(`${basePath}/session-info`)
+        .then((r) => {
+          if (!r.ok) throw new Error("Session check failed");
+          return r.json();
+        })
         .then((data) => {
+          if (!data.isAuthenticated) {
+            window.location.href = `${basePath}/login`;
+            return;
+          }
+          if (!data.isAdmin) {
+            // Only Super Admins can create organizations
+            alert(
+              "Access Denied: You do not have permission to create organizations."
+            );
+            window.location.href = `${basePath}/`; // Redirect to home/dashboard
+            return;
+          }
+          const profileEl = document.getElementById("userProfile");
+          if (profileEl && data.username) {
+            profileEl.textContent = data.username;
+          }
           const orgLink = document.getElementById("orgLink");
           const createOrgLink = document.getElementById("createOrgLink");
           const createUserLink = document.getElementById("createUserLink");
           const manageUsersLink = document.getElementById("manageUsersLink");
-          const profileEl = document.getElementById("userProfile");
-          const welcomeEl = document.getElementById("welcomeMessage");
-          if (data.username) {
-            profileEl.textContent = data.username;
-          }
-          if (!data.isAdmin) {
-            if (orgLink) orgLink.style.display = "none";
-            if (createOrgLink) createOrgLink.style.display = "none";
-          }
-          if (!data.isAdmin && !data.isOrgAdmin) {
-            if (createUserLink) createUserLink.style.display = "none";
-          }
-          if (!data.isOrgAdmin) {
-            if (manageUsersLink) manageUsersLink.style.display = "none";
-          }
-          if (!data.isAdmin && !data.isOrgAdmin) {
-            if (welcomeEl) welcomeEl.style.display = "block";
-          } else {
-            if (welcomeEl) welcomeEl.style.display = "none";
-            document.getElementById("dashboardWrapper").style.display = "block";
-          }
+
+          if (orgLink)
+            orgLink.style.display = data.isAdmin ? "inline-block" : "none";
+          if (createOrgLink)
+            createOrgLink.style.display = data.isAdmin
+              ? "inline-block"
+              : "none";
+          if (createUserLink)
+            createUserLink.style.display =
+              data.isAdmin || data.isOrgAdmin ? "inline-block" : "none";
+          if (manageUsersLink)
+            manageUsersLink.style.display = data.isOrgAdmin
+              ? "inline-block"
+              : "none";
         })
-        .catch(() => {
-          window.location.href = "/trainer_evaluation/login";
+        .catch((err) => {
+          console.error("Error:", err);
         });
 
       // --- Mobile Menu Toggle Logic ---
@@ -245,10 +296,7 @@
 
       if (menuToggle) {
         menuToggle.addEventListener("click", () => {
-          // Toggle the 'active' class on the navbar to show/hide it
           navbarLinks.classList.toggle("active");
-
-          // Check if the menu is now active to swap the icons
           const isActive = navbarLinks.classList.contains("active");
           menuIcon.style.display = isActive ? "none" : "block";
           closeIcon.style.display = isActive ? "block" : "none";

@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Training Details</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #2563eb;
+        --primary-light: #3b82f6;
+        --primary-dark: #1e40af;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-500: #6b7280;
+        --gray-700: #374151;
+        --gray-900: #111827;
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: linear-gradient(135deg, #bfd5f3 0%, #8eb3ec 100%);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 2em auto;
+        padding: 1em;
+      }
+
+      .header-nav {
+        /* Renamed from .header to avoid conflict if you have other .header styles */
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        flex-wrap: wrap;
+        gap: 10px;
+        top: 0;
+        z-index: 10;
+        background-color: #fff; /* Added background for sticky header */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for sticky header */
+      }
+
+      .logo {
+        /* position: absolute; */ /* Can be relative within the flex container */
+        /* top: 20px; */
+        /* left: 20px; */
+        width: 150px;
+        height: auto;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+      }
+
+      .back-btn {
+        background-color: #f3f4f6;
+        border: 1px solid #d1d5db;
+        color: #1e40af;
+        padding: 10px 16px;
+        font-size: 16px; /* Adjusted size */
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s ease;
+        text-decoration: none; /* Ensure it looks like a button */
+      }
+
+      .back-btn:hover {
+        background-color: #e5e7eb;
+      }
+
+      .header-nav .right-nav {
+        /* To group back button or other nav items */
+        margin-left: auto; /* Pushes it to the right */
+      }
+
+      .head {
+        text-align: center;
+        font-size: 2.5rem;
+        padding: 20px 15px;
+        color: #1a237e;
+        font-weight: 600;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        letter-spacing: -0.5px;
+      }
+
+      h1 {
+        /* This was generic, ensure it's used for .head or similar specific titles */
+        color: var(--gray-900);
+        /* margin: 0; */ /* Already handled by .head */
+        /* font-size: 1.75rem; */ /* Already handled by .head */
+      }
+
+      .form-container {
+        background-color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group {
+        margin-bottom: 1.75rem;
+      }
+
+      label {
+        display: block;
+        margin: 0 0 0.75em;
+        font-weight: 500;
+        color: var(--gray-700);
+        font-size: 1.05rem;
+      }
+
+      .required::after {
+        content: "*";
+        color: var(--danger-color);
+        margin-left: 0.25rem;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.875em 1em;
+        box-sizing: border-box;
+        border: 2px solid var(--gray-200);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background-color: #f9fafc;
+        color: var(--gray-700);
+      }
+
+      button {
+        /* General button styling */
+        padding: 0.875em 1.5em;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); /* Example shadow */
+        border: none; /* Remove default border */
+      }
+
+      /* #s3url, #message was too generic for status, renamed to .status-display */
+      .status-display {
+        margin-top: 1em;
+        font-weight: bold;
+        word-break: break-all;
+        padding: 0.75rem;
+        border-radius: 6px;
+        display: none; /* Hidden by default */
+      }
+      .status-display.success {
+        background-color: var(--success-color-light, #d1e7dd);
+        color: var(--success-color-dark, #0f5132);
+        border: 1px solid var(--success-color, #10b981);
+      }
+      .status-display.error {
+        background-color: var(--danger-color-light, #f8d7da);
+        color: var(--danger-color-dark, #721c24);
+        border: 1px solid var(--danger-color, #ef4444);
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        background-color: white;
+      }
+
+      input:hover,
+      select:hover,
+      textarea:hover {
+        border-color: var(--primary-light);
+        background-color: white;
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      .file-input {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .file-drop-area {
+        position: relative;
+        border: 2px dashed var(--primary-light);
+        border-radius: 12px;
+        background-color: rgba(59, 130, 246, 0.05);
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .file-drop-area:hover {
+        border-color: var(--primary-color);
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+
+      .file-drop-area.dragging {
+        border-color: var(--primary-color);
+        background-color: rgba(59, 130, 246, 0.15);
+      }
+
+      .file-icon {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+
+      .file-message {
+        font-size: 1.1rem;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+      }
+
+      .file-instructions {
+        font-size: 0.9rem;
+        color: var(--gray-500);
+      }
+
+      .file-input-info {
+        display: none; /* Hidden by default, shown when file selected */
+        padding: 1rem;
+        background-color: var(--gray-100);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        border: 1px solid var(--gray-200);
+        margin-top: 1rem;
+      }
+
+      .file-input-status {
+        /* Container for icon, name, size, remove button */
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .file-name {
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--gray-900);
+        flex-grow: 1; /* Allow name to take available space */
+      }
+
+      .file-size {
+        color: var(--gray-500);
+        font-size: 0.85rem;
+        white-space: nowrap; /* Prevent size from wrapping */
+      }
+
+      .file-remove {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background-color: var(--gray-200);
+        border-radius: 50%;
+        color: var(--gray-700);
+        cursor: pointer;
+        /* margin-left: auto; */ /* Pushed by flex-grow on file-name */
+        transition: all 0.2s ease;
+        border: none; /* Ensure it's button-like */
+        padding: 0; /* Reset padding */
+      }
+
+      .file-remove:hover {
+        background-color: var(--danger-color);
+        color: white;
+      }
+
+      .validation-message {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--danger-color);
+        display: none; /* Hidden by default */
+      }
+
+      .btn {
+        /* Generic button styling, can be specialized */
+        width: auto;
+        min-width: 120px;
+        display: inline-block;
+        font-weight: 600;
+        text-align: center;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 10px rgba(37, 99, 235, 0.3);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-secondary {
+        background-color: var(--gray-200);
+        color: var(--gray-700);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--gray-300);
+        transform: translateY(-2px);
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .mt-4 {
+        /* Standard margin top */
+        margin-top: 1.5rem !important;
+      }
+
+      .result-container {
+        display: none; /* Hidden by default */
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafc 100%);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+      }
+
+      .result-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        color: var(--success-color);
+        text-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+      }
+
+      .result-message {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        color: var(--gray-900);
+      }
+
+      .spinner-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: flex; /* Use flex for centering */
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        visibility: hidden; /* Hidden by default */
+        opacity: 0;
+        transition: visibility 0s linear 0.3s, opacity 0.3s linear; /* Smooth transition */
+      }
+
+      .spinner-overlay.active {
+        visibility: visible;
+        opacity: 1;
+        transition-delay: 0s; /* Immediate transition when active */
+      }
+
+      .spinner {
+        width: 60px;
+        height: 60px;
+        border: 6px solid rgba(37, 99, 235, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--primary-color);
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .select-wrapper {
+        position: relative;
+      }
+
+      .select-wrapper::after {
+        content: "\f078"; /* Font Awesome caret down */
+        font-family: "Font Awesome 6 Free"; /* Ensure correct font family */
+        font-weight: 900; /* Solid icon */
+        font-size: 1rem;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-color);
+        pointer-events: none; /* Allows click through to select */
+      }
+
+      select {
+        /* Remove default arrow */
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 40px; /* Space for custom arrow */
+      }
+
+      .error-field {
+        border-color: var(--danger-color) !important;
+      }
+
+      .error-field:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+      }
+
+      .error-message {
+        /* For general form error messages, not field specific */
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: block; /* Or none by default and shown by JS */
+      }
+
+      @media (max-width: 768px) {
+        /* Responsive adjustments */
+        .form-container,
+        .result-container {
+          padding: 1.5rem;
+        }
+
+        .header-nav {
+          padding: 1rem;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .head {
+          font-size: 1.8rem;
+          padding: 15px 10px; /* Adjust padding */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-nav">
+      <div class="left-nav">
+        <img
+          class="logo"
+          src="https://s3.ap-south-1.amazonaws.com/bluedataconsulting.co/Logo+Images/BDC+logo.png"
+          alt="Blue Data Consulting Logo"
+        />
+      </div>
+      <div class="right-nav">
+        <a href="/trainer_evaluation/" class="back-btn">← Go Back</a>
+      </div>
+    </div>
+
+    <div class="container">
+      <h1 class="head">Training Details</h1>
+
+      <div id="formContainer" class="form-container">
+        <form id="trainingForm">
+          <div class="form-group">
+            <label for="trainingNameInput" class="required"
+              >Training Name</label
+            >
+            <input
+              type="text"
+              id="trainingNameInput"
+              name="training"
+              required
+              placeholder="Enter training name"
+            />
+            <span id="trainingNameError" class="validation-message"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="contentOptionSelect" class="required"
+              >Training Content Option</label
+            >
+            <div class="select-wrapper">
+              <select
+                id="contentOptionSelect"
+                name="trainingContentOption"
+                required
+              >
+                <option value="">– Select an Option –</option>
+                <option value="Enter Text">Enter Text</option>
+                <option value="Attach PDF File">Attach PDF File</option>
+              </select>
+            </div>
+            <span id="contentOptionError" class="validation-message"></span>
+          </div>
+
+          <div id="textBlock" class="form-group" style="display: none">
+            <label for="trainingContentText" class="required"
+              >Training Content</label
+            >
+            <textarea
+              id="trainingContentText"
+              name="trainingContent"
+              rows="5"
+              placeholder="Enter your training content here..."
+            ></textarea>
+            <span id="trainingContentError" class="validation-message"></span>
+          </div>
+
+          <div id="fileBlock" class="form-group" style="display: none">
+            <label for="contentFileInput" class="required"
+              >PDF File Attachment</label
+            >
+            <div class="file-input">
+              <input
+                type="file"
+                id="contentFileInput"
+                accept="application/pdf"
+              />
+              <div class="file-drop-area" id="dropArea">
+                <div class="file-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="file-message">Drag & Drop PDF here</div>
+                <div class="file-instructions">
+                  or click to browse files (Max 37.5MB)
+                </div>
+              </div>
+              <div id="fileInfoDisplay" class="file-input-info">
+                <div class="file-input-status">
+                  <i
+                    class="fas fa-file-pdf"
+                    style="color: #ef4444; font-size: 1.5rem"
+                  ></i>
+                  <div id="fileNameDisplay" class="file-name"></div>
+                  <div id="fileSizeDisplay" class="file-size"></div>
+                  <button
+                    type="button"
+                    id="fileRemoveBtn"
+                    class="file-remove"
+                    aria-label="Remove selected file"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <span id="contentFileError" class="validation-message"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="qualificationsText">Required Qualifications</label>
+            <textarea
+              id="qualificationsText"
+              name="requiredQualifications"
+              rows="4"
+              placeholder="List any required qualifications for this training (optional)"
+            ></textarea>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-block">
+              Submit
+            </button>
+          </div>
+        </form>
+
+        <div id="statusMessage" class="status-display"></div>
+      </div>
+
+      <div id="resultContainer" class="result-container">
+        <div class="result-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="result-message">
+          Thank you for submitting the training details!
+        </div>
+        <button id="newSubmissionBtn" class="btn btn-primary">
+          Submit Another Training
+        </button>
+      </div>
+    </div>
+
+    <div id="spinnerOverlay" class="spinner-overlay">
+      <div class="spinner"></div>
+    </div>
+
+    <script>
+      const basePath = "/trainer_evaluation";
+      // Elements
+      const form = document.getElementById("trainingForm");
+      const formContainer = document.getElementById("formContainer");
+      const resultContainer = document.getElementById("resultContainer");
+      const newSubmissionBtn = document.getElementById("newSubmissionBtn");
+      const spinnerOverlay = document.getElementById("spinnerOverlay");
+      const contentOptionSelect = document.getElementById(
+        "contentOptionSelect"
+      );
+      const textBlock = document.getElementById("textBlock");
+      const fileBlock = document.getElementById("fileBlock");
+      const contentFileInput = document.getElementById("contentFileInput");
+      const fileInfoDisplay = document.getElementById("fileInfoDisplay");
+      const fileNameDisplay = document.getElementById("fileNameDisplay");
+      const fileSizeDisplay = document.getElementById("fileSizeDisplay");
+      const dropArea = document.getElementById("dropArea");
+      const fileRemoveBtn = document.getElementById("fileRemoveBtn");
+      const statusMessage = document.getElementById("statusMessage");
+
+      // Input fields
+      const trainingNameInput = document.getElementById("trainingNameInput");
+      const trainingContentText = document.getElementById(
+        "trainingContentText"
+      );
+      const qualificationsText = document.getElementById("qualificationsText");
+
+      // Validation elements
+      const trainingNameError = document.getElementById("trainingNameError");
+      const contentOptionError = document.getElementById("contentOptionError");
+      const trainingContentError = document.getElementById(
+        "trainingContentError"
+      );
+      const contentFileError = document.getElementById("contentFileError");
+
+      const FILE_SIZE_LIMIT = 37.5 * 1024 * 1024; // 37.5 MB
+
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropArea.addEventListener(
+          eventName,
+          () => dropArea.classList.add("dragging"),
+          false
+        );
+      });
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(
+          eventName,
+          () => dropArea.classList.remove("dragging"),
+          false
+        );
+      });
+      dropArea.addEventListener("drop", handleDrop, false);
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+          contentFileInput.files = files; // Assign dropped files to input
+          handleFileSelection(files[0]);
+        }
+      }
+
+      dropArea.addEventListener("click", () => contentFileInput.click());
+      fileRemoveBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        contentFileInput.value = ""; // Clear the file input
+        fileInfoDisplay.style.display = "none";
+        contentFileError.textContent = "";
+        contentFileError.style.display = "none";
+        contentFileInput.classList.remove("error-field");
+      });
+
+      contentOptionSelect.addEventListener("change", () => {
+        const selectedOption = contentOptionSelect.value;
+        clearError(contentOptionError, contentOptionSelect);
+
+        textBlock.style.display =
+          selectedOption === "Enter Text" ? "block" : "none";
+        fileBlock.style.display =
+          selectedOption === "Attach PDF File" ? "block" : "none";
+
+        trainingContentText.required = selectedOption === "Enter Text";
+        contentFileInput.required = selectedOption === "Attach PDF File";
+
+        if (selectedOption !== "Enter Text")
+          clearError(trainingContentError, trainingContentText);
+        if (selectedOption !== "Attach PDF File")
+          clearError(contentFileError, contentFileInput);
+      });
+
+      contentFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) handleFileSelection(file);
+      });
+
+      function handleFileSelection(file) {
+        clearError(contentFileError, contentFileInput);
+        fileNameDisplay.textContent = file.name;
+        fileSizeDisplay.textContent = formatFileSize(file.size);
+        fileInfoDisplay.style.display = "block"; // Show file info
+
+        if (file.type !== "application/pdf") {
+          showError(
+            contentFileError,
+            contentFileInput,
+            "Invalid file type. Only PDF is allowed."
+          );
+          return;
+        }
+        if (file.size > FILE_SIZE_LIMIT) {
+          showError(
+            contentFileError,
+            contentFileInput,
+            `File size exceeds limit of ${(
+              FILE_SIZE_LIMIT /
+              (1024 * 1024)
+            ).toFixed(1)} MB.`
+          );
+        }
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      function getBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(",")[1]);
+          reader.onerror = (error) => reject(error);
+        });
+      }
+
+      function showError(errorEl, inputEl, message) {
+        if (errorEl) {
+          errorEl.textContent = message;
+          errorEl.style.display = "block";
+        }
+        if (inputEl) inputEl.classList.add("error-field");
+      }
+      function clearError(errorEl, inputEl) {
+        if (errorEl) {
+          errorEl.textContent = "";
+          errorEl.style.display = "none";
+        }
+        if (inputEl) inputEl.classList.remove("error-field");
+      }
+
+      function validateForm() {
+        let isValid = true;
+        // Clear previous errors
+        [
+          trainingNameError,
+          contentOptionError,
+          trainingContentError,
+          contentFileError,
+        ].forEach((el) => clearError(el, null));
+        [
+          trainingNameInput,
+          contentOptionSelect,
+          trainingContentText,
+          contentFileInput,
+        ].forEach((el) => el.classList.remove("error-field"));
+
+        if (!trainingNameInput.value.trim()) {
+          showError(
+            trainingNameError,
+            trainingNameInput,
+            "Training name is required."
+          );
+          isValid = false;
+        }
+        if (!contentOptionSelect.value) {
+          showError(
+            contentOptionError,
+            contentOptionSelect,
+            "Please select a content option."
+          );
+          isValid = false;
+        }
+
+        if (
+          contentOptionSelect.value === "Enter Text" &&
+          !trainingContentText.value.trim()
+        ) {
+          showError(
+            trainingContentError,
+            trainingContentText,
+            "Training content is required for this option."
+          );
+          isValid = false;
+        } else if (contentOptionSelect.value === "Attach PDF File") {
+          if (!contentFileInput.files.length) {
+            showError(
+              contentFileError,
+              contentFileInput,
+              "Please select a PDF file for this option."
+            );
+            isValid = false;
+          } else {
+            const file = contentFileInput.files[0];
+            if (file.type !== "application/pdf") {
+              showError(
+                contentFileError,
+                contentFileInput,
+                "Invalid file type. Only PDF is allowed."
+              );
+              isValid = false;
+            }
+            if (file.size > FILE_SIZE_LIMIT) {
+              showError(
+                contentFileError,
+                contentFileInput,
+                `File size exceeds limit of ${(
+                  FILE_SIZE_LIMIT /
+                  (1024 * 1024)
+                ).toFixed(1)} MB.`
+              );
+              isValid = false;
+            }
+          }
+        }
+        return isValid;
+      }
+
+      function toggleSpinner(show) {
+        spinnerOverlay.classList.toggle("active", show);
+      }
+
+      function showStatusMessage(message, isSuccess = true) {
+        statusMessage.textContent = message;
+        statusMessage.className = `status-display ${
+          isSuccess ? "success" : "error"
+        }`;
+        statusMessage.style.display = "block";
+        setTimeout(() => (statusMessage.style.display = "none"), 5000); // Hide after 5s
+      }
+
+      function showThankYouView() {
+        formContainer.style.display = "none";
+        resultContainer.style.display = "block";
+        resultContainer.scrollIntoView({ behavior: "smooth" });
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+
+        toggleSpinner(true);
+        statusMessage.style.display = "none"; // Hide previous status
+
+        const payload = {
+          training: trainingNameInput.value.trim(),
+          trainingContentOption: contentOptionSelect.value,
+          trainingContent:
+            contentOptionSelect.value === "Enter Text"
+              ? trainingContentText.value.trim()
+              : "",
+          requiredQualifications: qualificationsText.value.trim(),
+        };
+
+        if (
+          contentOptionSelect.value === "Attach PDF File" &&
+          contentFileInput.files.length > 0
+        ) {
+          const file = contentFileInput.files[0];
+          payload.filename = file.name;
+          payload.filetype = file.type;
+          try {
+            payload.filedata = await getBase64(file);
+          } catch (err) {
+            toggleSpinner(false);
+            showError(
+              contentFileError,
+              contentFileInput,
+              "Error processing file: " + err.message
+            );
+            return;
+          }
+        }
+
+        try {
+          const response = await fetch(`${basePath}/submit-training-content`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          toggleSpinner(false);
+          const responseText = await response.text(); // Get text first to avoid JSON parse error if not JSON
+
+          if (response.ok) {
+            showThankYouView();
+          } else {
+            showStatusMessage(
+              responseText || "An error occurred while submitting the form.",
+              false
+            );
+          }
+        } catch (err) {
+          toggleSpinner(false);
+          showStatusMessage("Submission failed: " + err.message, false);
+        }
+      });
+
+      newSubmissionBtn.addEventListener("click", () => {
+        form.reset();
+        fileInfoDisplay.style.display = "none";
+        textBlock.style.display = "none";
+        fileBlock.style.display = "none";
+        formContainer.style.display = "block";
+        resultContainer.style.display = "none";
+        statusMessage.style.display = "none";
+        [
+          trainingNameError,
+          contentOptionError,
+          trainingContentError,
+          contentFileError,
+        ].forEach((el) => clearError(el));
+        [
+          trainingNameInput,
+          contentOptionSelect,
+          trainingContentText,
+          contentFileInput,
+        ].forEach((el) => el.classList.remove("error-field"));
+      });
+
+      // Verify session on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch(`${basePath}/session-info`)
+          .then((res) => {
+            if (!res.ok) {
+              window.location.href = `${basePath}/login`; // Redirect if not OK (e.g. 401)
+            }
+            return res.json();
+          })
+          .then((data) => {
+            if (!data.isAuthenticated) {
+              window.location.href = `${basePath}/login`;
+            }
+            // User is authenticated, page can remain.
+          })
+          .catch(() => {
+            window.location.href = `${basePath}/login`; // Redirect on error
+          });
+      });
+    </script>
+  </body>
+</html>

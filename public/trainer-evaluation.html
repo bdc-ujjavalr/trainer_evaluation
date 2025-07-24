@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trainer Evaluation Agent</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #2563eb;
+        --primary-light: #3b82f6;
+        --primary-dark: #1e40af;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-500: #6b7280;
+        --gray-700: #374151;
+        --gray-900: #111827;
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: var(--gray-700);
+        background: linear-gradient(135deg, #bfd5f3 0%, #8eb3ec 100%);
+        min-height: 100vh;
+      }
+      .container {
+        max-width: 800px;
+        margin: 2em auto;
+        padding: 1.5rem;
+      }
+
+      .header-nav {
+        /* Renamed .header to .header-nav */
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        flex-wrap: wrap;
+        gap: 10px;
+        top: 0;
+        z-index: 10;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .logo {
+        width: 150px;
+        height: auto;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+      }
+      .back-btn {
+        background-color: #f3f4f6;
+        border: 1px solid #d1d5db;
+        color: #1e40af;
+        padding: 10px 16px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s ease;
+        text-decoration: none;
+      }
+      .back-btn:hover {
+        background-color: #e5e7eb;
+      }
+      .header-nav .right-nav {
+        margin-left: auto;
+      }
+
+      .page-title-container {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding-top: 1rem;
+      }
+      .page-title {
+        font-size: 2.5rem;
+        color: #1a237e;
+        font-weight: 600;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        letter-spacing: -0.5px;
+        margin-bottom: 0.5rem;
+      }
+      .subtitle {
+        color: var(--gray-700);
+        font-size: 1.1rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+        letter-spacing: -0.25px;
+      }
+
+      .form-container {
+        background-color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        padding: 2.5rem;
+        transition: all 0.3s ease;
+      }
+      .form-group {
+        margin-bottom: 1.75rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 500;
+        color: var(--gray-700);
+        font-size: 1.05rem;
+      }
+      .required::after {
+        content: "*";
+        color: var(--danger-color);
+        margin-left: 0.25rem;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.875em 1em;
+        border: 2px solid var(--gray-200);
+        border-radius: 8px;
+        font-size: 1rem;
+        color: var(--gray-900);
+        transition: var(--transition);
+        background-color: #f9fafc;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        background-color: white;
+      }
+      input:hover,
+      select:hover,
+      textarea:hover {
+        border-color: var(--primary-light);
+        background-color: white;
+      }
+      input[type="file"] {
+        display: none;
+      }
+
+      .file-input {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .file-drop-area {
+        position: relative;
+        border: 2px dashed var(--primary-light);
+        border-radius: 12px;
+        background-color: rgba(59, 130, 246, 0.05);
+        padding: 2rem 1.5rem;
+        text-align: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      .file-drop-area:hover {
+        border-color: var(--primary-color);
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+      .file-drop-area.dragging {
+        border-color: var(--primary-color);
+        background-color: rgba(59, 130, 246, 0.15);
+      }
+      .file-icon {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+      .file-message {
+        font-size: 1.1rem;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+      }
+      .file-instructions {
+        font-size: 0.9rem;
+        color: var(--gray-500);
+      }
+
+      .file-input-info {
+        display: none;
+        padding: 1rem;
+        background-color: var(--gray-100);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        border: 1px solid var(--gray-200);
+        margin-top: 1rem;
+      }
+      .file-input-status {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .file-name {
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--gray-900);
+        flex-grow: 1;
+      }
+      .file-size {
+        color: var(--gray-500);
+        font-size: 0.85rem;
+        white-space: nowrap;
+      }
+      .file-remove-btn {
+        /* Added for consistency */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background-color: var(--gray-200);
+        border-radius: 50%;
+        color: var(--gray-700);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        padding: 0;
+      }
+      .file-remove-btn:hover {
+        background-color: var(--danger-color);
+        color: white;
+      }
+
+      .validation-message {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--danger-color);
+        display: none;
+      }
+
+      .btn {
+        display: inline-block;
+        font-weight: 600;
+        text-align: center;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+      }
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 10px rgba(37, 99, 235, 0.3);
+      }
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+      .btn-block {
+        width: 100%;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .mt-4 {
+        margin-top: 1.5rem !important;
+      }
+
+      .result-container {
+        display: none;
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafc 100%);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+      }
+      .result-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        color: var(--success-color);
+        text-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+      }
+      .result-message {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        color: var(--gray-900);
+      }
+
+      .spinner-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s linear 0.3s, opacity 0.3s linear;
+      }
+      .spinner-overlay.active {
+        visibility: visible;
+        opacity: 1;
+        transition-delay: 0s;
+      }
+      .spinner {
+        width: 60px;
+        height: 60px;
+        border: 6px solid rgba(37, 99, 235, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--primary-color);
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .select-wrapper {
+        position: relative;
+      }
+      .select-wrapper::after {
+        content: "\f078";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        font-size: 1rem;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-color);
+        pointer-events: none;
+      }
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 40px;
+      }
+
+      .error-field {
+        border-color: var(--danger-color) !important;
+      }
+      .error-field:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+      }
+
+      .status-area {
+        margin-top: 1.5rem;
+        border-top: 1px solid var(--gray-200);
+        padding-top: 1.5rem;
+      }
+      .status-message-box {
+        /* Renamed from .status-message */
+        padding: 1rem;
+        border-radius: 8px;
+        display: none;
+        margin-bottom: 1rem;
+      }
+      .status-message-box.success {
+        background-color: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #065f46;
+      }
+      .status-message-box.error {
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #b91c1c;
+      }
+
+      .status-url-box {
+        /* Renamed from .status-url */
+        padding: 1rem;
+        background-color: var(--gray-100);
+        border-radius: 8px;
+        word-break: break-all;
+        display: none;
+      }
+      .status-url-box a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .status-url-box a:hover {
+        text-decoration: underline;
+      }
+
+      .input-hint {
+        display: block;
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 0.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .form-container,
+        .result-container {
+          padding: 1.5rem;
+        }
+        .header-nav {
+          padding: 1rem;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .page-title {
+          font-size: 1.8rem;
+        }
+        .form-row {
+          flex-direction: column;
+          gap: 0 !important; /* Remove gap for stacked rows */
+        }
+        .form-row .form-group {
+          margin-bottom: 1.75rem;
+        } /* Restore bottom margin */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-nav">
+      <div class="left-nav">
+        <img
+          class="logo"
+          src="https://s3.ap-south-1.amazonaws.com/bluedataconsulting.co/Logo+Images/BDC+logo.png"
+          alt="Blue Data Consulting Logo"
+        />
+      </div>
+      <div class="right-nav">
+        <a href="/trainer_evaluation/" class="back-btn">← Go Back</a>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="page-title-container">
+        <h1 class="page-title">Trainer Evaluation Agent</h1>
+        <p class="subtitle">
+          Provide accurate information, including phone number with country
+          code.
+        </p>
+      </div>
+      <div id="evaluationFormContainer" class="form-container">
+        <form id="trainerEvaluationForm">
+          <div
+            class="form-row"
+            style="display: flex; gap: 1.5rem; margin-bottom: 0"
+          >
+            <div class="form-group" style="flex: 1">
+              <label for="firstNameInput" class="required">First Name</label>
+              <input
+                type="text"
+                id="firstNameInput"
+                required
+                placeholder="Enter first name"
+              />
+              <span id="firstNameError" class="validation-message"></span>
+            </div>
+            <div class="form-group" style="flex: 1">
+              <label for="lastNameInput" class="required">Last Name</label>
+              <input
+                type="text"
+                id="lastNameInput"
+                required
+                placeholder="Enter last name"
+              />
+              <span id="lastNameError" class="validation-message"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="phoneNumberInput" class="required">Phone Number</label>
+            <input
+              type="tel"
+              id="phoneNumberInput"
+              required
+              placeholder="+919898989898"
+            />
+            <span class="input-hint"
+              >Include country code (e.g., +91xxxxxxxxxx)</span
+            >
+            <span id="phoneNumberError" class="validation-message"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="trainerEmailInput" class="required"
+              >Trainer Email</label
+            >
+            <input
+              type="email"
+              id="trainerEmailInput"
+              required
+              placeholder="your.email@example.com"
+            />
+            <span id="trainerEmailError" class="validation-message"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="resumeFileInput" class="required"
+              >Resume / Trainer Profile</label
+            >
+            <div class="file-input">
+              <input
+                type="file"
+                id="resumeFileInput"
+                accept="application/pdf"
+                required
+              />
+              <div class="file-drop-area" id="resumeDropArea">
+                <div class="file-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="file-message">Drag & Drop PDF here</div>
+                <div class="file-instructions">
+                  or click to browse (Max 10MB)
+                </div>
+              </div>
+              <div id="resumeFileInfo" class="file-input-info">
+                <div class="file-input-status">
+                  <i
+                    class="fas fa-file-pdf"
+                    style="color: #ef4444; font-size: 1.5rem"
+                  ></i>
+                  <div id="resumeFileName" class="file-name"></div>
+                  <div id="resumeFileSize" class="file-size"></div>
+                  <button
+                    type="button"
+                    id="resumeFileRemoveBtn"
+                    class="file-remove-btn"
+                    aria-label="Remove resume file"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <span id="resumeFileError" class="validation-message"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="trainingSelectInput" class="required"
+              >Training Name</label
+            >
+            <div class="select-wrapper">
+              <select id="trainingSelectInput" required>
+                <option value="">Loading available trainings…</option>
+              </select>
+            </div>
+            <span id="trainingSelectError" class="validation-message"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="receiveReviewEmailInput" class="required"
+              >Email for Report</label
+            >
+            <input
+              type="email"
+              id="receiveReviewEmailInput"
+              required
+              placeholder="report.recipient@example.com"
+            />
+            <span class="input-hint"
+              >Enter your Email ID to receive the evaluation report.</span
+            >
+            <span id="receiveReviewError" class="validation-message"></span>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-block">
+              Submit
+            </button>
+          </div>
+        </form>
+
+        <div class="status-area">
+          <div id="s3UrlDisplay" class="status-url-box"></div>
+          <div id="formStatusMessage" class="status-message-box"></div>
+        </div>
+      </div>
+
+      <div id="evaluationResultContainer" class="result-container">
+        <div class="result-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="result-message">
+          Thank you! Your evaluation has been submitted.
+        </div>
+        <button id="newEvaluationBtn" class="btn btn-primary">
+          Submit Another Evaluation
+        </button>
+      </div>
+    </div>
+
+    <div id="spinnerOverlay" class="spinner-overlay">
+      <div class="spinner"></div>
+    </div>
+
+    <script>
+      const basePath = "/trainer_evaluation";
+      // Form and Fields
+      const form = document.getElementById("trainerEvaluationForm");
+      const formContainerEl = document.getElementById(
+        "evaluationFormContainer"
+      ); // Renamed
+      const resultContainerEl = document.getElementById(
+        "evaluationResultContainer"
+      ); // Renamed
+      const newSubmissionBtn = document.getElementById("newEvaluationBtn"); // Renamed
+      const spinnerOverlayEl = document.getElementById("spinnerOverlay"); // Renamed
+      const s3UrlDisplayEl = document.getElementById("s3UrlDisplay"); // Renamed
+      const formStatusMsgEl = document.getElementById("formStatusMessage"); // Renamed
+
+      const resumeFileInputEl = document.getElementById("resumeFileInput"); // Renamed
+      const resumeFileInfoEl = document.getElementById("resumeFileInfo"); // Renamed
+      const resumeFileNameEl = document.getElementById("resumeFileName"); // Renamed
+      const resumeFileSizeEl = document.getElementById("resumeFileSize"); // Renamed
+      const resumeDropAreaEl = document.getElementById("resumeDropArea"); // Renamed
+      const resumeFileRemoveBtnEl = document.getElementById(
+        "resumeFileRemoveBtn"
+      ); // Added
+      const trainingSelectEl = document.getElementById("trainingSelectInput"); // Renamed
+
+      // Input Elements
+      const firstNameInputEl = document.getElementById("firstNameInput");
+      const lastNameInputEl = document.getElementById("lastNameInput");
+      const phoneNumberInputEl = document.getElementById("phoneNumberInput");
+      const trainerEmailInputEl = document.getElementById("trainerEmailInput");
+      const receiveReviewEmailInputEl = document.getElementById(
+        "receiveReviewEmailInput"
+      );
+
+      // Validation Message Elements
+      const firstNameErrorEl = document.getElementById("firstNameError");
+      const lastNameErrorEl = document.getElementById("lastNameError");
+      const phoneNumberErrorEl = document.getElementById("phoneNumberError");
+      const trainerEmailErrorEl = document.getElementById("trainerEmailError");
+      const resumeFileErrorEl = document.getElementById("resumeFileError");
+      const trainingSelectErrorEl = document.getElementById(
+        "trainingSelectError"
+      );
+      const receiveReviewErrorEl =
+        document.getElementById("receiveReviewError");
+
+      const FILE_SIZE_LIMIT_RESUME = 10 * 1024 * 1024; // 10 MB for resume
+
+      function setupDragAndDrop(dropArea, fileInput, fileHandlerFn) {
+        ["dragenter", "dragover", "dragleave", "drop"].forEach((evt) =>
+          dropArea.addEventListener(
+            evt,
+            (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            },
+            false
+          )
+        );
+        ["dragenter", "dragover"].forEach((evt) =>
+          dropArea.addEventListener(
+            evt,
+            () => dropArea.classList.add("dragging"),
+            false
+          )
+        );
+        ["dragleave", "drop"].forEach((evt) =>
+          dropArea.addEventListener(
+            evt,
+            () => dropArea.classList.remove("dragging"),
+            false
+          )
+        );
+        dropArea.addEventListener(
+          "drop",
+          (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length) {
+              fileInput.files = files; // Assign to the actual file input
+              fileHandlerFn(files[0]);
+            }
+          },
+          false
+        );
+        dropArea.addEventListener("click", () => fileInput.click());
+      }
+      setupDragAndDrop(resumeDropAreaEl, resumeFileInputEl, handleResumeFile);
+
+      resumeFileInputEl.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) handleResumeFile(file);
+        else resumeFileInfoEl.style.display = "none";
+      });
+
+      resumeFileRemoveBtnEl.addEventListener("click", () => {
+        resumeFileInputEl.value = ""; // Clear file input
+        resumeFileInfoEl.style.display = "none";
+        clearFieldError(resumeFileErrorEl, resumeFileInputEl);
+      });
+
+      function handleResumeFile(file) {
+        clearFieldError(resumeFileErrorEl, resumeFileInputEl); // Clear previous error
+        resumeFileNameEl.textContent = file.name;
+        resumeFileSizeEl.textContent = formatBytes(file.size);
+        resumeFileInfoEl.style.display = "block";
+
+        if (file.type !== "application/pdf") {
+          showFieldError(
+            resumeFileErrorEl,
+            resumeFileInputEl,
+            "Please upload a PDF file."
+          );
+          return;
+        }
+        if (file.size > FILE_SIZE_LIMIT_RESUME) {
+          showFieldError(
+            resumeFileErrorEl,
+            resumeFileInputEl,
+            `File exceeds ${FILE_SIZE_LIMIT_RESUME / 1024 / 1024}MB limit.`
+          );
+        }
+      }
+      function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (
+          parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
+        );
+      }
+
+      function toggleSpinner(show) {
+        spinnerOverlayEl.classList.toggle("active", show);
+      }
+
+      function showThankYouMessage() {
+        formContainerEl.style.display = "none";
+        resultContainerEl.style.display = "block";
+        resultContainerEl.scrollIntoView({ behavior: "smooth" });
+      }
+      function showGeneralMessage(txt, type = "success") {
+        formStatusMsgEl.textContent = txt;
+        formStatusMsgEl.className = "status-message-box " + type;
+        formStatusMsgEl.style.display = "block";
+        setTimeout(() => (formStatusMsgEl.style.display = "none"), 5000);
+      }
+      function showFieldError(errorElement, inputElement, message) {
+        if (errorElement) {
+          errorElement.textContent = message;
+          errorElement.style.display = "block";
+        }
+        if (inputElement) inputElement.classList.add("error-field");
+      }
+      function clearFieldError(errorElement, inputElement) {
+        if (errorElement) {
+          errorElement.textContent = "";
+          errorElement.style.display = "none";
+        }
+        if (inputElement) inputElement.classList.remove("error-field");
+      }
+
+      function validateForm() {
+        let isValid = true;
+        // Clear all previous errors
+        [
+          firstNameErrorEl,
+          lastNameErrorEl,
+          phoneNumberErrorEl,
+          trainerEmailErrorEl,
+          resumeFileErrorEl,
+          trainingSelectErrorEl,
+          receiveReviewErrorEl,
+        ].forEach((el) => clearFieldError(el, null));
+        [
+          firstNameInputEl,
+          lastNameInputEl,
+          phoneNumberInputEl,
+          trainerEmailInputEl,
+          resumeFileInputEl,
+          trainingSelectEl,
+          receiveReviewEmailInputEl,
+        ].forEach((el) => el.classList.remove("error-field"));
+
+        if (!firstNameInputEl.value.trim()) {
+          showFieldError(
+            firstNameErrorEl,
+            firstNameInputEl,
+            "First name is required."
+          );
+          isValid = false;
+        }
+        if (!lastNameInputEl.value.trim()) {
+          showFieldError(
+            lastNameErrorEl,
+            lastNameInputEl,
+            "Last name is required."
+          );
+          isValid = false;
+        }
+        if (!/^\+\d{8,15}$/.test(phoneNumberInputEl.value.trim())) {
+          showFieldError(
+            phoneNumberErrorEl,
+            phoneNumberInputEl,
+            "Valid phone with country code (e.g., +91XXXXXXXXXX) is required."
+          );
+          isValid = false;
+        }
+        if (
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trainerEmailInputEl.value.trim())
+        ) {
+          showFieldError(
+            trainerEmailErrorEl,
+            trainerEmailInputEl,
+            "A valid trainer email is required."
+          );
+          isValid = false;
+        }
+        if (!resumeFileInputEl.files.length) {
+          showFieldError(
+            resumeFileErrorEl,
+            resumeFileInputEl,
+            "Resume PDF is required."
+          );
+          isValid = false;
+        } else {
+          const file = resumeFileInputEl.files[0];
+          if (file.type !== "application/pdf") {
+            showFieldError(
+              resumeFileErrorEl,
+              resumeFileInputEl,
+              "Resume must be a PDF."
+            );
+            isValid = false;
+          }
+          if (file.size > FILE_SIZE_LIMIT_RESUME) {
+            showFieldError(
+              resumeFileErrorEl,
+              resumeFileInputEl,
+              `Resume exceeds ${FILE_SIZE_LIMIT_RESUME / 1024 / 1024}MB limit.`
+            );
+            isValid = false;
+          }
+        }
+        if (!trainingSelectEl.value) {
+          showFieldError(
+            trainingSelectErrorEl,
+            trainingSelectEl,
+            "Please select a training."
+          );
+          isValid = false;
+        }
+        if (
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+            receiveReviewEmailInputEl.value.trim()
+          )
+        ) {
+          showFieldError(
+            receiveReviewErrorEl,
+            receiveReviewEmailInputEl,
+            "A valid email to receive the report is required."
+          );
+          isValid = false;
+        }
+        return isValid;
+      }
+
+      async function loadTrainingOptions() {
+        trainingSelectEl.innerHTML =
+          '<option value="">Loading trainings…</option>';
+        try {
+          toggleSpinner(true);
+          const res = await fetch(`${basePath}/api/training-contents`);
+          if (!res.ok)
+            throw new Error(`Failed to load trainings: ${res.statusText}`);
+          const trainings = await res.json();
+
+          if (trainings && trainings.length > 0) {
+            trainingSelectEl.innerHTML =
+              '<option value="">— Select Training —</option>';
+            trainings.forEach((t) => {
+              if (t.training && t.airtableRecordId) {
+                // Ensure essential fields exist
+                const opt = document.createElement("option");
+                opt.value = t.airtableRecordId; // Airtable Record ID
+                opt.textContent = t.training; // Human-readable name
+                trainingSelectEl.add(opt);
+              }
+            });
+          } else {
+            trainingSelectEl.innerHTML =
+              '<option value="">— No Trainings Available —</option>';
+          }
+        } catch (err) {
+          console.error("Error loading trainings:", err);
+          trainingSelectEl.innerHTML =
+            '<option value="">— Error Loading Trainings —</option>';
+          showGeneralMessage(
+            "Could not load training options. Please try refreshing.",
+            "error"
+          );
+        } finally {
+          toggleSpinner(false);
+        }
+      }
+
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(",")[1]); // Get base64 part
+          reader.onerror = (error) => reject(error);
+        });
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+
+        toggleSpinner(true);
+        showGeneralMessage("Processing your submission…", "info"); // Using info type
+        s3UrlDisplayEl.style.display = "none"; // Hide previous S3 URL
+
+        try {
+          const file = resumeFileInputEl.files[0];
+          const fileDataString = await fileToBase64(file); // Convert file to base64 string
+
+          // No S3 presign needed if sending base64 to backend for upload
+          // const s3UploadUrl = await uploadToS3(file); // This was for client-side S3 presign which is removed
+
+          const payload = {
+            firstName: firstNameInputEl.value.trim(),
+            lastName: lastNameInputEl.value.trim(),
+            phoneNumber: phoneNumberInputEl.value.trim(),
+            trainerEmail: trainerEmailInputEl.value.trim(),
+            receiveReview: receiveReviewEmailInputEl.value.trim(),
+            trainingId: trainingSelectEl.value, // Airtable Record ID of the selected training
+            trainingName: trainingSelectEl.selectedOptions[0].text, // Human-readable name
+            filename: file.name,
+            filetype: file.type,
+            filedata: fileDataString, // Send base64 data
+            interviewStatus: "pending", // Default status
+          };
+
+          const resp = await fetch(`${basePath}/submit-trainer-evaluation`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const responseText = await resp.text(); // Get text first
+          if (!resp.ok)
+            throw new Error(responseText || `Server error: ${resp.status}`);
+
+          showThankYouMessage();
+        } catch (err) {
+          showGeneralMessage("❌ Submission failed: " + err.message, "error");
+        } finally {
+          toggleSpinner(false);
+        }
+      });
+
+      newSubmissionBtn.addEventListener("click", () => {
+        form.reset();
+        resumeFileInfoEl.style.display = "none";
+        s3UrlDisplayEl.style.display = "none";
+        formStatusMsgEl.style.display = "none";
+        // Clear all validation messages and error states
+        [
+          firstNameErrorEl,
+          lastNameErrorEl,
+          phoneNumberErrorEl,
+          trainerEmailErrorEl,
+          resumeFileErrorEl,
+          trainingSelectErrorEl,
+          receiveReviewErrorEl,
+        ].forEach((el) => clearFieldError(el));
+        [
+          firstNameInputEl,
+          lastNameInputEl,
+          phoneNumberInputEl,
+          trainerEmailInputEl,
+          resumeFileInputEl,
+          trainingSelectEl,
+          receiveReviewEmailInputEl,
+        ].forEach((el) => el.classList.remove("error-field"));
+
+        formContainerEl.style.display = "block";
+        resultContainerEl.style.display = "none";
+        loadTrainingOptions(); // Reload trainings for new submission
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch(`${basePath}/session-info`)
+          .then((res) => {
+            if (!res.ok) window.location.href = `${basePath}/login`;
+            return res.json();
+          })
+          .then((data) => {
+            if (!data.isAuthenticated)
+              window.location.href = `${basePath}/login`;
+            loadTrainingOptions(); // Load after successful auth check
+          })
+          .catch(() => (window.location.href = `${basePath}/login`));
+      });
+    </script>
+  </body>
+</html>

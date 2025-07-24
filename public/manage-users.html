@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Users</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #bfd5f3;
+        margin: 0;
+        padding: 0;
+      }
+      .header {
+        background: #fff;
+        padding: 15px 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .header img {
+        width: 150px;
+      }
+      .header nav a {
+        margin-left: 20px;
+        text-decoration: none;
+        color: #1a237e;
+        font-weight: bold;
+      }
+      .header nav a:hover {
+        text-decoration: underline;
+      }
+      .main {
+        padding: 40px 20px;
+      }
+      h2 {
+        margin-top: 0;
+        color: #333;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        background: #fff;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+      }
+      th {
+        background: #f7f7f7;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .btn-delete {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn-delete:hover {
+        background: #c0392b;
+      }
+      .button {
+        display: inline-block;
+        background: #4a80d5;
+        color: #fff;
+        padding: 10px 16px;
+        justify-content: center;
+        text-decoration: none;
+        border-radius: 4px;
+      }
+      .button:hover {
+        background: #3a6fc4;
+      }
+      .dashboard {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          padding: 1rem;
+        }
+
+        .button {
+          width: 22%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <img
+        src="https://s3.ap-south-1.amazonaws.com/bluedataconsulting.co/Logo+Images/BDC+logo.png"
+        alt="Logo"
+      />
+      <nav>
+        <a href="/trainer_evaluation/logout">Logout</a>
+      </nav>
+    </div>
+
+    <div class="main">
+      <div class="dashboard">
+        <h2>Users in Your Organization</h2>
+        <a href="/trainer_evaluation/" class="button">Back &#127968;</a>
+      </div>
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="3">Loading…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      // add your basePath here
+      const basePath = "/trainer_evaluation";
+
+      let orgId;
+
+      // 1) Figure out which org we’re in
+      fetch(`${basePath}/session-info`)
+        .then((r) => r.json())
+        .then((info) => {
+          orgId = info.organizationId;
+          if (!orgId) throw new Error("No organization assigned");
+          return fetch(`${basePath}/api/organizations/${orgId}/users`);
+        })
+        .then((r) => r.json())
+        .then((users) => {
+          const tbody = document.querySelector("#usersTable tbody");
+          tbody.innerHTML = "";
+          users.forEach((u) => {
+            const tr = document.createElement("tr");
+            tr.dataset.userid = u._id;
+            tr.innerHTML = `
+            <td>${u.username}</td>
+            <td>${u.isOrgAdmin ? "Organization Admin" : "User"}</td>
+            <td>
+              ${
+                u.isOrgAdmin ? "" : '<button class="btn-delete">Delete</button>'
+              }
+            </td>
+          `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(() => {
+          document.querySelector("#usersTable tbody").innerHTML =
+            '<tr><td colspan="3">Failed to load users</td></tr>';
+        });
+
+      // 2) Wire up DELETE calls
+      document.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("btn-delete")) return;
+        const tr = e.target.closest("tr");
+        const uid = tr.dataset.userid;
+        if (!confirm("Really delete this user?")) return;
+
+        fetch(`${basePath}/api/organizations/${orgId}/users/${uid}`, {
+          method: "DELETE",
+        })
+          .then((res) => {
+            if (!res.ok)
+              return res
+                .json()
+                .then((b) => Promise.reject(b.error || "Delete failed"));
+            return res.json();
+          })
+          .then(() => {
+            // Only remove DOM row after successful backend delete
+            tr.remove();
+          })
+          .catch((err) => {
+            alert("Error deleting user: " + err);
+          });
+      });
+    </script>
+  </body>
+</html>

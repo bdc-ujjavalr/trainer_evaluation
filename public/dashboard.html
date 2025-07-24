@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard</title>
+    <style>
+      /* ---------- General Styles ---------- */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #bfd5f3;
+        color: #333;
+        line-height: 1.6;
+      }
+      .dashboard-container {
+        display: block;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      h1 {
+        color: #1a2b4d;
+        border-bottom: 3px solid #007bff;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+        font-size: 2.2em;
+        font-weight: 600;
+      }
+      .loading-message,
+      .error-message,
+      .no-data-message {
+        text-align: center;
+        font-size: 1.1em;
+        padding: 25px;
+        border-radius: 5px;
+      }
+      .loading-message {
+        color: #0056b3;
+      }
+      .error-message {
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+      }
+      .no-data-message {
+        color: #555;
+        background-color: #eef0f2;
+        font-style: italic;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* ---------- Table Styles ---------- */
+      .table-wrapper {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+        background-color: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+      }
+      th,
+      td {
+        border: 1px solid #e9ecef;
+        padding: 14px 18px;
+        text-align: left;
+        font-size: 0.95em;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+      th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        text-transform: capitalize;
+        font-size: 1em;
+      }
+      tr:nth-child(even) td {
+        background-color: #fdfdfd;
+      }
+      tr:hover td {
+        background-color: #e6f7ff;
+      }
+      a {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.2s ease-in-out;
+      }
+      a:hover {
+        color: #0056b3;
+        text-decoration: underline;
+      }
+      .text-truncate {
+        max-width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        vertical-align: bottom;
+      }
+      .badge {
+        padding: 0.3em 0.6em;
+        font-size: 0.8em;
+        font-weight: bold;
+        border-radius: 0.25rem;
+        display: inline-block;
+      }
+      .badge-admin {
+        background-color: #ffc107;
+        color: #333;
+      }
+      .badge-org-admin {
+        background-color: #17a2b8;
+        color: white;
+      }
+      .badge-user {
+        background-color: #6c757d;
+        color: white;
+      }
+
+      /* ---------- Tab Styles ---------- */
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap; /* Default for larger screens */
+      }
+      .tab-button {
+        padding: 10px 20px;
+        background: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #495057;
+        transition: all 0.2s ease-in-out;
+        white-space: nowrap; /* Prevent button text from wrapping */
+      }
+      .tab-button.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+        box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.5s;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .section-title {
+        margin-bottom: 1rem;
+        font-size: 1.5em;
+        color: #1a2b4d;
+        font-weight: 600;
+      }
+
+      /* ---------- Pagination Styles ---------- */
+      .pagination {
+        text-align: right;
+        margin-top: 15px;
+      }
+      .pagination button {
+        padding: 6px 12px;
+        margin-left: 5px;
+        background: #007bff;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        font-size: 0.9em;
+      }
+      .pagination button:disabled {
+        background: #cccccc;
+        cursor: default;
+      }
+
+      /* ---------- Call Overview Styles ---------- */
+      .overview-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.1em;
+        color: #2c3e50;
+      }
+      .card .value {
+        font-size: 2em;
+        color: #2980b9;
+        margin: 10px 0;
+      }
+      .card canvas {
+        width: 100% !important;
+        height: 150px !important;
+      }
+
+      /* ---------- Loader Styles ---------- */
+      .loader-spin {
+        animation: spin 1s linear infinite;
+        display: inline-block;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /*
+       * RESPONSIVE STYLES FOR TABS
+       * On smaller screens (tablets and mobiles), we change the tab container
+       * to scroll horizontally instead of wrapping.
+      */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px; /* Reduce padding on small screens */
+        }
+        .tabs {
+          flex-wrap: nowrap; /* Prevent tabs from wrapping to the next line */
+          overflow-x: auto; /* Enable horizontal scrolling */
+          -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+          scrollbar-width: thin; /* For Firefox */
+          scrollbar-color: #007bff #e9ecef; /* For Firefox */
+          padding-bottom: 10px; /* Add space for the scrollbar */
+        }
+        /* Style for the scrollbar handle */
+        .tabs::-webkit-scrollbar {
+          height: 5px;
+        }
+        /* Style for the scrollbar track */
+        .tabs::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        /* Style for the scrollbar thumb */
+        .tabs::-webkit-scrollbar-thumb {
+          background: #007bff;
+          border-radius: 10px;
+        }
+        .tabs::-webkit-scrollbar-thumb:hover {
+          background: #0056b3;
+        }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div id="loadingMessage" class="loading-message">
+      Loading dashboard essentials...
+    </div>
+    <div id="errorMessage" class="error-message" style="display: none"></div>
+
+    <div
+      class="dashboard-container"
+      id="dashboardContainer"
+      style="display: none"
+    >
+      <h1 id="dashboardTitle">Dashboard</h1>
+
+      <div class="tabs">
+        <button class="tab-button active" data-target="usersTab">Users</button>
+        <button class="tab-button" data-target="orgTab">Organizations</button>
+        <button class="tab-button" data-target="trainingTab">
+          Training Contents
+        </button>
+        <button class="tab-button" data-target="evalTab">
+          Trainer Evaluations
+        </button>
+        <button class="tab-button" data-target="callOverviewTab">
+          Call Overview
+        </button>
+      </div>
+
+      <div id="usersTab" class="tab-content active">
+        <h2 class="section-title">Users</h2>
+        <div id="usersTableContainer" class="table-wrapper">
+          <p class="loading-message">Loading users...</p>
+        </div>
+      </div>
+      <div id="orgTab" class="tab-content">
+        <h2 class="section-title">Organizations</h2>
+        <div id="organizationsTableContainer" class="table-wrapper">
+          <p class="loading-message">Loading organizations...</p>
+        </div>
+      </div>
+      <div id="trainingTab" class="tab-content">
+        <h2 class="section-title">Training Contents</h2>
+        <div id="trainingContentsTableContainer" class="table-wrapper">
+          <p class="loading-message">Loading training contents...</p>
+        </div>
+      </div>
+      <div id="evalTab" class="tab-content">
+        <div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              flex-wrap: wrap; /* Allow wrapping of refresh button on small screens */
+            "
+          >
+            <h2 class="section-title">Trainer Evaluations</h2>
+            <button
+              id="refreshEvalDataBtn"
+              title="Refresh Pending Statuses"
+              style="
+                padding: 5px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                line-height: 0;
+              "
+            >
+              <img
+                src="refresh.png"
+                alt="Refresh"
+                id="refreshEvalIcon"
+                style="width: 18px; height: 18px; vertical-align: middle"
+              />
+            </button>
+          </div>
+          <span
+            id="refreshEvalStatusMsg"
+            style="
+              margin-left: 10px;
+              font-size: 0.9em;
+              display: none; /* Initially hidden */
+              align-items: center;
+            "
+          ></span>
+        </div>
+        <div id="trainerEvaluationsTableContainer" class="table-wrapper">
+          <p class="loading-message">Loading trainer evaluations...</p>
+        </div>
+      </div>
+      <div id="callOverviewTab" class="tab-content">
+        <h2 class="section-title">Call Overview</h2>
+        <div id="callLoading" class="loading-message">Loading call data...</div>
+        <div
+          class="overview-cards"
+          id="overviewCards"
+          style="display: none"
+        ></div>
+        <div
+          id="dailySummaryTableContainer"
+          style="margin-top: 30px; display: none"
+        ></div>
+      </div>
+    </div>
+
+    <script>
+      // Your existing JavaScript remains unchanged.
+      // The CSS changes handle the responsiveness without needing JS modification.
+      const basePath = "/trainer_evaluation";
+      const pageSize = 5;
+      const paginationState = {};
+      let isSuper = false,
+        isOrgAdmin = false,
+        orgId = "";
+
+      let aggregatedOrgCallData = {};
+      let currentCallOverviewState = "aggregated";
+
+      async function fetchSession() {
+        try {
+          const res = await fetch(`${basePath}/session-info`);
+          if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(
+              `Access denied or server error: ${res.status} ${errorText}`
+            );
+          }
+          const info = await res.json();
+          if (!info.isAuthenticated)
+            throw new Error("Not authenticated. Please login.");
+
+          isSuper = info.isAdmin;
+          isOrgAdmin = info.isOrgAdmin;
+          orgId = info.organizationId || "";
+
+          const callOverviewButton = document.querySelector(
+            '[data-target="callOverviewTab"]'
+          );
+          const callOverviewTabContent =
+            document.getElementById("callOverviewTab");
+
+          if (!isSuper && !isOrgAdmin) {
+            if (callOverviewButton) callOverviewButton.style.display = "none";
+            if (callOverviewTabContent)
+              callOverviewTabContent.style.display = "none";
+          } else {
+            if (callOverviewButton) callOverviewButton.style.display = "";
+          }
+        } catch (e) {
+          console.error("Error fetching session:", e);
+          const errorMessageElement = document.getElementById("errorMessage");
+          if (errorMessageElement) {
+            errorMessageElement.textContent =
+              "Session error: " +
+              e.message +
+              (e.message.includes("login")
+                ? ""
+                : " Try logging out and back in.");
+            errorMessageElement.style.display = "block";
+          }
+          const dashboardContainer =
+            document.getElementById("dashboardContainer");
+          if (dashboardContainer) dashboardContainer.style.display = "none";
+          const loadingMessage = document.getElementById("loadingMessage");
+          if (loadingMessage) loadingMessage.style.display = "none";
+          if (
+            e.message.includes("Not authenticated") ||
+            e.message.includes("Access denied")
+          ) {
+            window.location.href = `${basePath}/login`;
+          }
+        }
+      }
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("tab-button")) return;
+
+        document
+          .querySelectorAll(".tab-button")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+
+        e.target.classList.add("active");
+        const targetId = e.target.dataset.target;
+        const targetContent = document.getElementById(targetId);
+        if (targetContent) targetContent.classList.add("active");
+
+        if (targetId === "callOverviewTab") {
+          if (isSuper || isOrgAdmin) {
+            currentCallOverviewState = "aggregated";
+            loadCallOverview();
+          }
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const loadingMessage = document.getElementById("loadingMessage");
+        const errorMessageElement = document.getElementById("errorMessage");
+        const dashboardContainer =
+          document.getElementById("dashboardContainer");
+        const titleElement = document.getElementById("dashboardTitle");
+        const orgTabButton = document.querySelector('[data-target="orgTab"]');
+        const orgTabContent = document.getElementById("orgTab");
+
+        await fetchSession();
+
+        if (loadingMessage) loadingMessage.style.display = "none";
+        if (dashboardContainer) dashboardContainer.style.display = "block";
+
+        const activeTabButton = document.querySelector(".tab-button.active");
+        if (
+          activeTabButton &&
+          activeTabButton.dataset.target === "callOverviewTab"
+        ) {
+          if (isSuper || isOrgAdmin) {
+            currentCallOverviewState = "aggregated";
+            loadCallOverview();
+          }
+        }
+
+        try {
+          const promises = [];
+
+          if (isSuper) {
+            if (orgTabButton) orgTabButton.style.display = "";
+            promises.push(
+              loadAndDisplayData(
+                `${basePath}/api/all-organizations`,
+                "organizationsTableContainer",
+                createOrganizationsTable,
+                "No organizations found."
+              )
+            );
+          } else {
+            if (orgTabButton) orgTabButton.style.display = "none";
+            if (orgTabContent) orgTabContent.style.display = "none";
+            if (
+              activeTabButton &&
+              activeTabButton.dataset.target === "orgTab"
+            ) {
+              document
+                .querySelector('.tab-button[data-target="usersTab"]')
+                ?.click();
+            }
+          }
+
+          if (isSuper || isOrgAdmin) {
+            if (isOrgAdmin && !isSuper && titleElement) {
+              titleElement.textContent = "Organization Dashboard";
+            }
+
+            const usersApi = isSuper
+              ? `${basePath}/api/all-users`
+              : `${basePath}/api/users`;
+            promises.push(
+              loadAndDisplayData(
+                usersApi,
+                "usersTableContainer",
+                (users) => createUsersTable(users, isSuper),
+                "No users found."
+              )
+            );
+
+            const trainingApi = isSuper
+              ? `${basePath}/api/all-training-contents`
+              : `${basePath}/api/training-contents`;
+            promises.push(
+              loadAndDisplayData(
+                trainingApi,
+                "trainingContentsTableContainer",
+                createTrainingContentsTable,
+                "No training contents found."
+              )
+            );
+
+            const evalsApi = isSuper
+              ? `${basePath}/api/all-trainer-evaluations`
+              : `${basePath}/api/trainer-evaluations`;
+            promises.push(
+              loadAndDisplayData(
+                evalsApi,
+                "trainerEvaluationsTableContainer",
+                createTrainerEvaluationsTable,
+                "No trainer evaluations found."
+              )
+            );
+          } else {
+            ["usersTab", "trainingTab", "evalTab", "orgTab"].forEach(
+              (tabId) => {
+                const tabButton = document.querySelector(
+                  `[data-target="${tabId}"]`
+                );
+                const tabContent = document.getElementById(tabId);
+                if (tabButton) tabButton.style.display = "none";
+                if (tabContent) tabContent.style.display = "none";
+              }
+            );
+            if (titleElement) titleElement.textContent = "Welcome";
+            const firstContentArea = document.querySelector(".tab-content");
+            if (
+              firstContentArea &&
+              dashboardContainer.querySelectorAll(
+                '.tab-button[style*="display: none"]'
+              ).length === document.querySelectorAll(".tab-button").length
+            ) {
+              dashboardContainer.innerHTML =
+                '<div class="no-data-message" style="text-align: center; padding: 20px; height: 50vh;"><h1>Welcome To The Dashboard</h1></div>';
+            } else if (
+              activeTabButton &&
+              activeTabButton.style.display === "none"
+            ) {
+              document
+                .querySelector('.tab-button:not([style*="display: none"])')
+                ?.click();
+            }
+          }
+          await Promise.all(promises);
+        } catch (err) {
+          console.error("Error loading dashboard components:", err);
+          if (errorMessageElement) {
+            errorMessageElement.textContent =
+              "Error setting up dashboard: " + err.message;
+            errorMessageElement.style.display = "block";
+          }
+        }
+        if (isSuper || isOrgAdmin) {
+          setupRefreshButton();
+        }
+      });
+
+      function setupRefreshButton() {
+        const refreshBtn = document.getElementById("refreshEvalDataBtn");
+        const refreshIcon = document.getElementById("refreshEvalIcon");
+        const refreshStatusMsg = document.getElementById(
+          "refreshEvalStatusMsg"
+        );
+
+        if (refreshBtn && refreshIcon && refreshStatusMsg) {
+          if (refreshBtn.dataset.listenerAttached === "true") return;
+          refreshBtn.dataset.listenerAttached = "true";
+
+          refreshBtn.addEventListener("click", async () => {
+            refreshBtn.disabled = true;
+            refreshIcon.classList.add("loader-spin");
+            try {
+              const response = await fetch(
+                `${basePath}/api/sync-ended-interviews`,
+                {
+                  method: "POST",
+                  headers: {
+                    Accept: "application/json",
+                  },
+                }
+              );
+              const result = await response.json();
+              if (!response.ok || !result.success) {
+                throw new Error(
+                  result.error ||
+                    result.details ||
+                    result.message ||
+                    "Failed to sync statuses from server."
+                );
+              }
+              const evalsApiUrl = isSuper
+                ? `${basePath}/api/all-trainer-evaluations`
+                : `${basePath}/api/trainer-evaluations`;
+              await loadAndDisplayData(
+                evalsApiUrl,
+                "trainerEvaluationsTableContainer",
+                createTrainerEvaluationsTable,
+                "No trainer evaluations found."
+              );
+            } catch (error) {
+              console.error("Error refreshing interview statuses:", error);
+              refreshStatusMsg.textContent = `Error: ${error.message}`;
+              refreshStatusMsg.style.color = "#721c24";
+              refreshStatusMsg.style.display = "inline-flex";
+            } finally {
+              refreshBtn.disabled = false;
+              refreshIcon.classList.remove("loader-spin");
+              setTimeout(() => {
+                refreshStatusMsg.textContent = "";
+                refreshStatusMsg.style.display = "none";
+              }, 5000);
+            }
+          });
+        } else {
+          console.warn(
+            "Refresh button, icon, or status message element not found for Trainer Evaluations tab."
+          );
+        }
+      }
+
+      function createOrganizationBreakdownTableHtml(orgData) {
+        if (Object.keys(orgData).length === 0) {
+          return '<p class="no-data-message" style="margin-top:15px;">No organization-specific data to display.</p>';
+        }
+
+        let tableHtml = `
+            <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organization Name</th>
+                        <th style="text-align: right;">Total Call Minutes</th>
+                        <th style="text-align: right;">Number of Calls</th>
+                        <th style="text-align: right;">Total Spent ($)</th>
+                        <th style="text-align: right;">Avg Cost/Call ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        Object.values(orgData)
+          .sort((a, b) => a.orgName.localeCompare(b.orgName))
+          .forEach((org) => {
+            const orgAvgCost =
+              org.callCount > 0
+                ? (org.totalCost / org.callCount).toFixed(2)
+                : "0.00";
+            tableHtml += `
+                    <tr>
+                        <td>${escapeHtml(org.orgName)}</td>
+                        <td style="text-align: right;">${org.totalMin.toFixed(
+                          2
+                        )}</td>
+                        <td style="text-align: right;">${org.callCount}</td>
+                        <td style="text-align: right;">${org.totalCost.toFixed(
+                          2
+                        )}</td>
+                        <td style="text-align: right;">${orgAvgCost}</td>
+                    </tr>
+                `;
+          });
+
+        tableHtml += `
+                </tbody>
+            </table>
+            </div>
+        `;
+        return tableHtml;
+      }
+
+      function createDailySummaryTable(dailyData, daysArray) {
+        if (daysArray.length === 0) {
+          return '<h3 class="section-title" style="font-size: 1.3em; margin-top: 20px; margin-bottom: 10px;">Daily Summary</h3><p class="no-data-message" style="margin-top:15px;">No daily data available for summary table.</p>';
+        }
+
+        let tableHtml = `
+              <h3 class="section-title" style="font-size: 1.3em; margin-top: 20px; margin-bottom: 10px;">Daily Summary</h3>
+              <div class="table-wrapper">
+              <table>
+                  <thead>
+                      <tr>
+                          <th>Date</th>
+                          <th style="text-align: right;">Total Call Minutes</th>
+                          <th style="text-align: right;">Number of Calls</th>
+                          <th style="text-align: right;">Total Spent ($)</th>
+                          <th style="text-align: right;">Avg Cost/Call ($)</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+          `;
+        daysArray.forEach((day) => {
+          const minutes = dailyData.minutes[day] || 0;
+          const count = dailyData.count[day] || 0;
+          const spent = dailyData.spent[day] || 0;
+          const avgCost = count > 0 ? spent / count : 0;
+
+          tableHtml += `
+                  <tr>
+                      <td>${escapeHtml(day)}</td>
+                      <td style="text-align: right;">${minutes.toFixed(2)}</td>
+                      <td style="text-align: right;">${count}</td>
+                      <td style="text-align: right;">${spent.toFixed(2)}</td>
+                      <td style="text-align: right;">${avgCost.toFixed(2)}</td>
+                  </tr>
+              `;
+        });
+
+        tableHtml += `
+                  </tbody>
+              </table>
+              </div>
+          `;
+        return tableHtml;
+      }
+
+      async function loadCallOverview() {
+        if (!isSuper && !isOrgAdmin) {
+          const callOverviewTabElement =
+            document.getElementById("callOverviewTab");
+          if (callOverviewTabElement) {
+            callOverviewTabElement.style.display = "none";
+            callOverviewTabElement.innerHTML = "";
+          }
+          const callOverviewButton = document.querySelector(
+            '[data-target="callOverviewTab"]'
+          );
+          if (callOverviewButton) callOverviewButton.style.display = "none";
+          return;
+        }
+
+        const loader = document.getElementById("callLoading");
+        const cardsContainer = document.getElementById("overviewCards");
+        const dailyTableContainer = document.getElementById(
+          "dailySummaryTableContainer"
+        );
+
+        if (!loader || !cardsContainer || !dailyTableContainer) {
+          console.error(
+            "Call overview critical elements (loader, cardsContainer, or dailyTableContainer) not found."
+          );
+          return;
+        }
+
+        loader.textContent = "Fetching call data for overview...";
+        loader.style.display = "block";
+        cardsContainer.style.display = "none";
+        dailyTableContainer.style.display = "none";
+        dailyTableContainer.innerHTML = "";
+
+        const apiUrl = isSuper
+          ? `${basePath}/api/all-trainer-evaluations`
+          : `${basePath}/api/trainer-evaluations`;
+
+        try {
+          const res = await fetch(apiUrl);
+          if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(
+              `API request failed: ${res.status} ${res.statusText}. Details: ${errorText}`
+            );
+          }
+          const evaluations = await res.json();
+
+          if (!Array.isArray(evaluations)) {
+            throw new Error(
+              "Invalid data format: evaluations is not an array."
+            );
+          }
+
+          const relevantEvaluations = evaluations.filter(
+            (e) =>
+              e.callStartedAt &&
+              e.callEndedAt &&
+              e.cost !== null &&
+              e.cost !== undefined
+          );
+
+          if (isSuper) {
+            aggregatedOrgCallData = {};
+          }
+
+          if (relevantEvaluations.length === 0) {
+            const message = "No relevant call data found for overview.";
+            loader.textContent = message;
+            cardsContainer.innerHTML = `<p class="no-data-message">${message}</p>`;
+            cardsContainer.style.display = "block";
+
+            if (isSuper) {
+              const orgTableTitle =
+                '<h3 class="section-title" style="font-size: 1.3em; margin-top: 20px; margin-bottom: 10px;">Call Overview by Organization</h3>';
+              dailyTableContainer.innerHTML =
+                orgTableTitle + createOrganizationBreakdownTableHtml({});
+            } else if (isOrgAdmin) {
+              dailyTableContainer.innerHTML = createDailySummaryTable({}, []);
+            }
+            dailyTableContainer.style.display = "block";
+            return;
+          }
+
+          let totalMin = 0;
+          let totalCost = 0;
+          const byDate = { count: {}, minutes: {}, spent: {} };
+
+          relevantEvaluations.forEach((e) => {
+            const s = Date.parse(e.callStartedAt);
+            const en = Date.parse(e.callEndedAt);
+
+            if (isNaN(s) || isNaN(en) || s >= en) return;
+
+            const mins = (en - s) / 60000;
+            const costVal = parseFloat(e.cost);
+
+            if (isNaN(costVal)) return;
+
+            totalMin += mins;
+            totalCost += costVal;
+
+            const day = new Date(s).toISOString().split("T")[0];
+            byDate.count[day] = (byDate.count[day] || 0) + 1;
+            byDate.minutes[day] = (byDate.minutes[day] || 0) + mins;
+            byDate.spent[day] = (byDate.spent[day] || 0) + costVal;
+
+            if (isSuper) {
+              const orgIdentifier =
+                e.organizationId?._id || e.organizationId || "unknown_org";
+              const orgDisplayName =
+                e.organizationName ||
+                (e.organizationId
+                  ? e.organizationId.name
+                  : "Unknown Organization");
+
+              if (!aggregatedOrgCallData[orgIdentifier]) {
+                aggregatedOrgCallData[orgIdentifier] = {
+                  orgName: orgDisplayName,
+                  totalMin: 0,
+                  callCount: 0,
+                  totalCost: 0,
+                };
+              }
+              aggregatedOrgCallData[orgIdentifier].totalMin += mins;
+              aggregatedOrgCallData[orgIdentifier].callCount++;
+              aggregatedOrgCallData[orgIdentifier].totalCost += costVal;
+            }
+          });
+
+          const avgCostPerCall = relevantEvaluations.length
+            ? totalCost / relevantEvaluations.length
+            : 0;
+
+          loader.style.display = "none";
+          cardsContainer.innerHTML = `
+            <div class="card" data-metric="totalMinutes"><h3>Total Call Minutes</h3><div class="value">${totalMin.toFixed(
+              2
+            )}</div><canvas id="chartMin"></canvas></div>
+            <div class="card" data-metric="numCalls"><h3>Number of Calls</h3><div class="value">${
+              relevantEvaluations.length
+            }</div><canvas id="chartCnt"></canvas></div>
+            <div class="card" data-metric="totalSpent"><h3>Total Spent</h3><div class="value">$${totalCost.toFixed(
+              2
+            )}</div><canvas id="chartSpent"></canvas></div>
+            <div class="card" data-metric="avgCost"><h3>Avg Cost/Call</h3><div class="value">$${avgCostPerCall.toFixed(
+              2
+            )}</div><canvas id="chartAvg"></canvas></div>
+          `;
+          cardsContainer.style.display = "grid";
+
+          const days = Object.keys(byDate.count).sort(
+            (a, b) => new Date(a) - new Date(b)
+          );
+
+          const baseChartConfig = {
+            type: "line",
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  animation: false,
+                  callbacks: {
+                    title: function (tooltipItems) {
+                      if (tooltipItems.length > 0) return tooltipItems[0].label;
+                      return "";
+                    },
+                    label: function (context) {
+                      let originalLabel = context.dataset.label || "";
+                      let value = context.parsed.y;
+                      if (value === null || typeof value === "undefined")
+                        return null;
+
+                      let metricPrefix = "";
+                      const chartId = context.chart.canvas.id;
+                      let displayValue = value;
+
+                      if (chartId === "chartMin") {
+                        metricPrefix = "callMinute";
+                        displayValue = value.toFixed(3);
+                      } else if (chartId === "chartCnt") {
+                        metricPrefix = "callCount";
+                        displayValue = parseInt(value);
+                      } else if (chartId === "chartSpent") {
+                        metricPrefix = "totalSpent";
+                        displayValue = "$" + value.toFixed(2);
+                      } else if (chartId === "chartAvg") {
+                        metricPrefix = "avgCostPerCall";
+                        displayValue = "$" + value.toFixed(2);
+                      } else {
+                        metricPrefix = originalLabel
+                          .toLowerCase()
+                          .replace(/\s+/g, "");
+                      }
+                      return metricPrefix + ": " + displayValue;
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  display: true,
+                  title: { display: true, text: "Date" },
+                  ticks: {
+                    maxRotation: 40,
+                    minRotation: 40,
+                    autoSkip: true,
+                    maxTicksLimit: 10,
+                  },
+                },
+                y: {
+                  display: true,
+                  title: { display: true, text: "" },
+                  beginAtZero: true,
+                },
+              },
+            },
+          };
+
+          ["chartMin", "chartCnt", "chartSpent", "chartAvg"].forEach((id) => {
+            const chartInstance = Chart.getChart(id);
+            if (chartInstance) chartInstance.destroy();
+          });
+
+          if (document.getElementById("chartMin") && days.length > 0) {
+            new Chart(document.getElementById("chartMin"), {
+              ...baseChartConfig,
+              data: {
+                labels: days,
+                datasets: [
+                  {
+                    label: "Minutes",
+                    data: days.map((d) => byDate.minutes[d]),
+                    borderColor: "#2980b9",
+                    tension: 0.3,
+                  },
+                ],
+              },
+              options: {
+                ...baseChartConfig.options,
+                scales: {
+                  ...baseChartConfig.options.scales,
+                  y: {
+                    ...baseChartConfig.options.scales.y,
+                    title: { display: true, text: "Minutes" },
+                  },
+                },
+              },
+            });
+          }
+          if (document.getElementById("chartCnt") && days.length > 0) {
+            new Chart(document.getElementById("chartCnt"), {
+              ...baseChartConfig,
+              data: {
+                labels: days,
+                datasets: [
+                  {
+                    label: "Count",
+                    data: days.map((d) => byDate.count[d]),
+                    borderColor: "#27ae60",
+                    tension: 0.3,
+                  },
+                ],
+              },
+              options: {
+                ...baseChartConfig.options,
+                scales: {
+                  ...baseChartConfig.options.scales,
+                  y: {
+                    ...baseChartConfig.options.scales.y,
+                    title: { display: true, text: "Count" },
+                  },
+                },
+              },
+            });
+          }
+          if (document.getElementById("chartSpent") && days.length > 0) {
+            new Chart(document.getElementById("chartSpent"), {
+              ...baseChartConfig,
+              data: {
+                labels: days,
+                datasets: [
+                  {
+                    label: "USD",
+                    data: days.map((d) => byDate.spent[d]),
+                    borderColor: "#e67e22",
+                    tension: 0.3,
+                  },
+                ],
+              },
+              options: {
+                ...baseChartConfig.options,
+                scales: {
+                  ...baseChartConfig.options.scales,
+                  y: {
+                    ...baseChartConfig.options.scales.y,
+                    title: { display: true, text: "USD" },
+                  },
+                },
+              },
+            });
+          }
+          if (document.getElementById("chartAvg") && days.length > 0) {
+            new Chart(document.getElementById("chartAvg"), {
+              ...baseChartConfig,
+              data: {
+                labels: days,
+                datasets: [
+                  {
+                    label: "USD",
+                    data: days.map(
+                      (d) => byDate.spent[d] / byDate.count[d] || 0
+                    ),
+                    borderColor: "#8e44ad",
+                    tension: 0.3,
+                  },
+                ],
+              },
+              options: {
+                ...baseChartConfig.options,
+                scales: {
+                  ...baseChartConfig.options.scales,
+                  y: {
+                    ...baseChartConfig.options.scales.y,
+                    title: { display: true, text: "USD" },
+                  },
+                },
+              },
+            });
+          }
+
+          if (days.length === 0 && relevantEvaluations.length > 0) {
+            cardsContainer.querySelectorAll("canvas").forEach((canvas) => {
+              const canvasContainer = canvas.parentElement;
+              if (canvasContainer) {
+                const noTrendMsg = document.createElement("p");
+                noTrendMsg.textContent =
+                  "No daily trend data (all calls on same day or insufficient data).";
+                noTrendMsg.style.textAlign = "center";
+                noTrendMsg.style.fontSize = "0.8em";
+                noTrendMsg.style.color = "#777";
+                canvasContainer.appendChild(noTrendMsg);
+              }
+              canvas.style.display = "none";
+            });
+          }
+
+          if (currentCallOverviewState === "aggregated") {
+            if (isSuper) {
+              const orgTableTitle =
+                '<h3 class="section-title" style="font-size: 1.3em; margin-top: 20px; margin-bottom: 10px;">Call Overview by Organization</h3>';
+              if (Object.keys(aggregatedOrgCallData).length > 0) {
+                const orgTableHtml = createOrganizationBreakdownTableHtml(
+                  aggregatedOrgCallData
+                );
+                dailyTableContainer.innerHTML = orgTableTitle + orgTableHtml;
+              } else {
+                dailyTableContainer.innerHTML =
+                  orgTableTitle +
+                  '<p class="no-data-message" style="margin-top:15px;">No organization-specific data for breakdown.</p>';
+              }
+            } else if (isOrgAdmin) {
+              dailyTableContainer.innerHTML = createDailySummaryTable(
+                byDate,
+                days
+              );
+            } else {
+              dailyTableContainer.innerHTML = "";
+            }
+            dailyTableContainer.style.display = "block";
+          } else {
+            dailyTableContainer.innerHTML = "";
+            dailyTableContainer.style.display = "none";
+          }
+        } catch (err) {
+          console.error(
+            "Error processing call overview from evaluations:",
+            err
+          );
+          if (loader) {
+            loader.textContent = "Error loading call overview: " + err.message;
+            loader.style.color = "#721c24";
+            loader.style.display = "block";
+          }
+          if (cardsContainer) {
+            cardsContainer.innerHTML = `<p class="error-message">Failed to load call overview data: ${err.message}</p>`;
+            cardsContainer.style.display = "block";
+          }
+          if (dailyTableContainer) {
+            dailyTableContainer.innerHTML = `<p class="error-message">Failed to load call summary/breakdown: ${err.message}</p>`;
+            dailyTableContainer.style.display = "block";
+          }
+        }
+      }
+
+      function displayOrganizationBreakdown(containerElement) {
+        currentCallOverviewState = "organizationDetail";
+        containerElement.innerHTML = "";
+
+        const dailyTableRef = document.getElementById(
+          "dailySummaryTableContainer"
+        );
+        if (dailyTableRef) {
+          dailyTableRef.innerHTML = "";
+          dailyTableRef.style.display = "none";
+        }
+
+        const title = document.createElement("h3");
+        title.textContent = "Call Overview by Organization";
+        title.style.marginBottom = "15px";
+        title.style.fontSize = "1.4em";
+        title.style.color = "#1a2b4d";
+        containerElement.appendChild(title);
+
+        const backButton = document.createElement("button");
+        backButton.textContent = "← Back to Overall Overview";
+        backButton.style.marginBottom = "20px";
+        backButton.style.padding = "10px 15px";
+        backButton.style.backgroundColor = "#6c757d";
+        backButton.style.color = "white";
+        backButton.style.border = "none";
+        backButton.style.borderRadius = "4px";
+        backButton.style.cursor = "pointer";
+        backButton.onclick = () => {
+          currentCallOverviewState = "aggregated";
+          loadCallOverview();
+        };
+        containerElement.appendChild(backButton);
+
+        const orgTableHtml = createOrganizationBreakdownTableHtml(
+          aggregatedOrgCallData
+        );
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = orgTableHtml;
+
+        if (tempDiv.firstChild) {
+          containerElement.appendChild(tempDiv.firstChild.cloneNode(true));
+        } else {
+          containerElement.innerHTML +=
+            '<p class="error-message">Could not display organization breakdown.</p>';
+        }
+        containerElement.style.display = "block";
+      }
+
+      async function loadAndDisplayData(
+        apiUrl,
+        containerId,
+        tableCreationFn,
+        noDataMessage
+      ) {
+        const containerElement = document.getElementById(containerId);
+        if (!containerElement) {
+          console.error("Container element not found for ID:", containerId);
+          return;
+        }
+        containerElement.innerHTML =
+          '<p class="loading-message">Loading...</p>';
+        try {
+          const response = await fetch(apiUrl);
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+              `HTTP ${response.status}: ${response.statusText}. ${errorText}`
+            );
+          }
+          const data = await response.json();
+
+          let actualData = data;
+          if (!Array.isArray(data) && data && Array.isArray(data.data)) {
+            actualData = data.data;
+          } else if (!Array.isArray(data)) {
+            throw new Error(
+              "Data fetched is not an array or recognized wrapped array."
+            );
+          }
+
+          if (!actualData.length) {
+            containerElement.innerHTML = `<p class="no-data-message">${noDataMessage}</p>`;
+            return;
+          }
+          paginationState[containerId] = {
+            data: actualData,
+            tableFn: tableCreationFn,
+            page: 1,
+            pageSize: pageSize,
+          };
+          renderPage(containerId);
+        } catch (error) {
+          console.error(
+            "Error in loadAndDisplayData for",
+            containerId,
+            ":",
+            error
+          );
+          containerElement.innerHTML = `<p class="error-message">Error loading data: ${error.message}</p>`;
+        }
+      }
+
+      function renderPage(containerId) {
+        const state = paginationState[containerId];
+        if (!state) return;
+        const { data, tableFn, page, pageSize: currentPageSize } = state;
+
+        const totalItems = data.length;
+        const totalPages = Math.ceil(totalItems / currentPageSize);
+        const paginatedData = data.slice(
+          (page - 1) * currentPageSize,
+          page * currentPageSize
+        );
+
+        const containerElement = document.getElementById(containerId);
+        if (!containerElement) return;
+
+        containerElement.innerHTML = tableFn(paginatedData);
+
+        if (totalPages > 1) {
+          const paginationControls = document.createElement("div");
+          paginationControls.className = "pagination";
+
+          const prevButton = document.createElement("button");
+          prevButton.textContent = "Previous";
+          prevButton.disabled = page <= 1;
+          prevButton.onclick = () => {
+            state.page--;
+            renderPage(containerId);
+          };
+
+          const pageInfo = document.createElement("span");
+          pageInfo.textContent = ` Page ${page} of ${totalPages} `;
+          pageInfo.style.margin = "0 10px";
+
+          const nextButton = document.createElement("button");
+          nextButton.textContent = "Next";
+          nextButton.disabled = page >= totalPages;
+          nextButton.onclick = () => {
+            state.page++;
+            renderPage(containerId);
+          };
+
+          paginationControls.append(prevButton, pageInfo, nextButton);
+          containerElement.appendChild(paginationControls);
+        }
+      }
+
+      function escapeHtml(unsafe) {
+        if (unsafe === null || typeof unsafe === "undefined") return "";
+        return String(unsafe)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return "";
+        try {
+          return new Date(dateString).toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
+        } catch (e) {
+          return "Invalid Date";
+        }
+      }
+
+      function truncate(text, maxLength = 50) {
+        text = String(text || "");
+        if (text.length <= maxLength) return escapeHtml(text);
+        return `<span title="${escapeHtml(text)}">${escapeHtml(
+          text.slice(0, maxLength)
+        )}...</span>`;
+      }
+
+      function createTable(headersConfig, dataArray, rowCreationFn) {
+        let tableHtml = `<div class="table-wrapper"><table><thead><tr>`;
+        headersConfig.forEach((header) => {
+          const label =
+            typeof header === "object"
+              ? header.label
+              : header
+                  .replace(/([A-Z])/g, " $1")
+                  .replace(/_/g, " ")
+                  .replace(/\b\w/g, (l) => l.toUpperCase())
+                  .trim();
+          tableHtml += `<th>${escapeHtml(label)}</th>`;
+        });
+        tableHtml += "</tr></thead><tbody>";
+        if (dataArray.length === 0) {
+          tableHtml += `<tr><td colspan="${headersConfig.length}" class="no-data-message" style="text-align:center;">No data available in table.</td></tr>`;
+        } else {
+          dataArray.forEach((item) => (tableHtml += rowCreationFn(item)));
+        }
+        tableHtml += "</tbody></table></div>";
+        return tableHtml;
+      }
+
+      function createOrganizationsTable(orgs) {
+        return createTable(
+          [
+            { key: "_id", label: "Organization ID" },
+            { key: "name", label: "Name" },
+            { key: "createdBy", label: "Created By" },
+            { key: "createdAt", label: "Created At" },
+          ],
+          orgs,
+          (o) => `<tr>
+              <td>${escapeHtml(o._id)}</td>
+              <td>${escapeHtml(o.name)}</td>
+              <td>${
+                o.createdBy
+                  ? `${escapeHtml(
+                      o.createdBy.username || ""
+                    )} <span class="text-muted d-block">(${escapeHtml(
+                      o.createdBy._id || ""
+                    )})</span>`
+                  : "N/A"
+              }</td>
+              <td>${formatDate(o.createdAt)}</td>
+            </tr>`
+        );
+      }
+
+      function createUsersTable(users, isCurrentUserSuper) {
+        return createTable(
+          [
+            { key: "_id", label: "User ID" },
+            { key: "username", label: "Username" },
+            { key: "organization", label: "Organization" },
+            { key: "roles", label: "Roles" },
+          ],
+          users,
+          (u) => {
+            const roles = [];
+            if (u.isAdmin)
+              roles.push('<span class="badge badge-admin">Super Admin</span>');
+            if (u.isOrgAdmin)
+              roles.push(
+                '<span class="badge badge-org-admin">Org Admin</span>'
+              );
+            if (!u.isAdmin && !u.isOrgAdmin)
+              roles.push('<span class="badge badge-user">User</span>');
+
+            let orgDisplay = "N/A";
+            if (u.organizationId) {
+              const orgName =
+                u.organizationId.name || u.organizationName || "Unknown Org";
+              const orgIdentifier = u.organizationId._id || u.organizationId;
+              orgDisplay = `${escapeHtml(
+                orgName
+              )} <span class="text-muted d-block">(${escapeHtml(
+                orgIdentifier
+              )})</span>`;
+            }
+            return `<tr>
+                <td>${escapeHtml(u._id)}</td>
+                <td>${escapeHtml(u.username)}</td>
+                <td>${orgDisplay}</td>
+                <td>${roles.join(" ") || "User"}</td>
+              </tr>`;
+          }
+        );
+      }
+
+      function createTrainingContentsTable(contents) {
+        return createTable(
+          [
+            "Organization",
+            "User",
+            "Training",
+            "Content Option",
+            "Content/Attachment",
+            "Qualifications",
+            "Created At",
+          ],
+          contents,
+          (c) => `<tr>
+              <td>${escapeHtml(
+                c.organizationId
+                  ? c.organizationId.name || c.organizationName
+                  : "N/A"
+              )}</td>
+              <td>${escapeHtml(
+                c.userId ? c.userId.username || c.userName : "N/A"
+              )}</td>
+              <td>${escapeHtml(c.training)}</td>
+              <td>${escapeHtml(c.trainingContentOption)}</td>
+              <td>${
+                c.trainingContentOption === "Enter Text"
+                  ? truncate(c.trainingContent, 70)
+                  : c.attachmentUrl
+                  ? `<a href="${escapeHtml(
+                      c.attachmentUrl
+                    )}" target="_blank" title="${escapeHtml(
+                      c.filename || "Attachment"
+                    )}">${truncate(c.filename || "View File", 30)}</a>`
+                  : "N/A"
+              }
+              </td>
+              <td>${truncate(c.requiredQualifications, 70)}</td>
+              <td>${formatDate(c.createdAt)}</td>
+            </tr>`
+        );
+      }
+
+      function createTrainerEvaluationsTable(evals) {
+        return createTable(
+          [
+            "Organization",
+            "User",
+            "Candidate",
+            "Email",
+            "Phone",
+            "Training Name",
+            "Resume",
+            "Interview Status",
+            "Transcript",
+            "Recording",
+            "Call End Reason",
+            "Summary",
+            "Cost",
+            "Call Started",
+            "Call Ended",
+            { key: "Call ID", label: "Call ID" },
+            "Review Email",
+            "Submitted At",
+            // { key: "Airtable ID", label: "Airtable ID" },
+          ],
+          evals,
+          (e) => {
+            let statusDisplay = escapeHtml(e.interviewStatus || "pending");
+            statusDisplay =
+              statusDisplay.charAt(0).toUpperCase() + statusDisplay.slice(1);
+            if (statusDisplay === "Airtable_record_not_found") {
+              statusDisplay = "Airtable Record Missing";
+            }
+
+            return `<tr>
+                <td>${escapeHtml(
+                  e.organizationName ||
+                    (e.organizationId ? e.organizationId.name : "")
+                )}</td>
+                <td>${escapeHtml(
+                  e.userName || (e.userId ? e.userId.username : "")
+                )}</td>
+                <td>${escapeHtml(e.firstName || "")} ${escapeHtml(
+              e.lastName || ""
+            )}</td>
+                <td><a href="mailto:${escapeHtml(
+                  e.trainerEmail || ""
+                )}">${escapeHtml(e.trainerEmail || "")}</a></td>
+                <td>${escapeHtml(e.phoneNumber || "")}</td>
+                <td>${escapeHtml(e.trainingName || "")}</td>
+                <td>${
+                  e.resumeUrl
+                    ? `<a href="${escapeHtml(
+                        e.resumeUrl
+                      )}" target="_blank">${truncate(
+                        e.filename || "View Resume",
+                        20
+                      )}</a>`
+                    : "N/A"
+                }</td>
+                <td>${statusDisplay}</td>
+                <td>${truncate(e.transcript, 30)}</td>
+                <td>${
+                  e.interviewRecordingUrl
+                    ? `<a href="${escapeHtml(
+                        e.interviewRecordingUrl
+                      )}" target="_blank">Recording</a>`
+                    : "N/A"
+                }</td>
+                <td>${escapeHtml(e.callendReason || "")}</td>
+                <td>${truncate(e.summary, 30)}</td>
+                <td>${
+                  e.cost != null ? "$" + parseFloat(e.cost).toFixed(2) : "N/A"
+                }</td>
+                <td>${formatDate(e.callStartedAt)}</td>
+                <td>${formatDate(e.callEndedAt)}</td>
+                <td>${escapeHtml(e.callId || "")}</td>
+                <td><a href="mailto:${escapeHtml(
+                  e.receiveReview || ""
+                )}">${escapeHtml(e.receiveReview || "")}</a></td>
+                <td>${formatDate(e.createdAt)}</td>
+            </tr>`;
+          }
+        );
+      }
+    </script>
+  </body>
+</html>

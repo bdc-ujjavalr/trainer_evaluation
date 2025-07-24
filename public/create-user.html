@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create User</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #bfd5f3;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .header {
+        background: #fff;
+        padding: 15px 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .logo {
+        width: 150px;
+        height: auto;
+      }
+      .navbar {
+        display: flex;
+        align-items: center;
+      }
+      .navbar a {
+        margin-left: 20px;
+        color: #1a237e;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 15px;
+        padding: 5px 0;
+      }
+      .navbar a:hover {
+        text-decoration: underline;
+      }
+      .user-profile {
+        margin-left: 20px;
+        color: #1a237e;
+        font-weight: bold;
+        font-size: 15px;
+        padding: 5px 0;
+      }
+      .menu-toggle {
+        display: none;
+        cursor: pointer;
+        border: none;
+        background: none;
+        padding: 0;
+      }
+      .menu-toggle svg {
+        width: 30px;
+        height: 30px;
+        fill: #1a237e;
+      }
+      #close-icon {
+        display: none;
+      }
+      .main-content {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+      .container {
+        background: white;
+        padding: 30px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #1e1e1e;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+        font-weight: bold;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      .button {
+        background: #4a80d5;
+        color: white;
+        border: none;
+        padding: 12px;
+        width: 100%;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .button:hover {
+        background: #3a6fc4;
+      }
+      .message {
+        text-align: center;
+        margin-bottom: 15px;
+        padding: 8px;
+        border-radius: 4px;
+        display: none;
+      }
+      .error {
+        background: #f8d7da;
+        color: #842029;
+      }
+      .success {
+        background: #d1e7dd;
+        color: #0f5132;
+      }
+
+      @media (max-width: 992px) {
+        .menu-toggle {
+          display: block;
+        }
+        .header {
+          padding: 1rem;
+        }
+        .navbar {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          width: 100%;
+          background: #fff;
+          flex-direction: column;
+          align-items: center;
+          padding: 15px 0;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .navbar.active {
+          display: flex;
+        }
+        .navbar a,
+        .user-profile {
+          margin: 10px 0;
+          margin-left: 0;
+          width: 100%;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <img
+        class="logo"
+        src="https://s3.ap-south-1.amazonaws.com/bluedataconsulting.co/Logo+Images/BDC+logo.png"
+        alt="Blue Data Consulting Logo"
+      />
+      <button class="menu-toggle" aria-label="Toggle navigation menu">
+        <svg id="menu-icon" viewBox="0 0 24 24">
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+        </svg>
+        <svg id="close-icon" viewBox="0 0 24 24">
+          <path
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+          ></path>
+        </svg>
+      </button>
+      <div class="navbar" id="navbar-links">
+        <a href="/trainer_evaluation/">Home</a>
+        <a href="/trainer_evaluation/organizations-dashboard" id="orgLink"
+          >Organizations</a
+        >
+        <a href="/trainer_evaluation/create-organization" id="createOrgLink"
+          >Create Organization</a
+        >
+        <a href="/trainer_evaluation/trainer-evaluation.html"
+          >Trainer Evaluation</a
+        >
+        <a href="/trainer_evaluation/training-details.html">Training Details</a>
+        <a href="/trainer_evaluation/create-user">Create User</a>
+        <a href="/trainer_evaluation/manage-users" id="manageUsersLink"
+          >Manage Users</a
+        >
+        <span id="userProfile" class="user-profile"></span>
+        <a href="/trainer_evaluation/logout">Logout</a>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="container">
+        <h2>Create New User</h2>
+        <div id="messageDisplay" class="message"></div>
+        <form
+          action="/trainer_evaluation/create-user"
+          method="POST"
+          id="createUserForm"
+        >
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input id="username" name="username" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required />
+          </div>
+          <div id="orgSelectGroup" class="form-group" style="display: none">
+            <label for="organization">Organization</label>
+            <select id="organization" name="organizationId">
+              <option value="">Loading organizations…</option>
+            </select>
+          </div>
+          <button class="button" type="submit">Create User</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // --- Page Specific Logic ---
+      const basePath = "/trainer_evaluation";
+      const params = new URLSearchParams(window.location.search);
+      const messageDisplay = document.getElementById("messageDisplay");
+
+      if (params.get("error")) {
+        messageDisplay.textContent = decodeURIComponent(
+          params.get("error").replace(/\+/g, " ")
+        );
+        messageDisplay.className = "message error";
+        messageDisplay.style.display = "block";
+      }
+      if (params.get("success")) {
+        messageDisplay.textContent = decodeURIComponent(
+          params.get("success").replace(/\+/g, " ")
+        );
+        messageDisplay.className = "message success";
+        messageDisplay.style.display = "block";
+      }
+
+      fetch(`${basePath}/session-info`)
+        .then((r) => {
+          if (!r.ok) throw new Error("Failed to fetch session info");
+          return r.json();
+        })
+        .then((data) => {
+          if (!data.isAuthenticated) {
+            window.location.href = `${basePath}/login`;
+            return;
+          }
+
+          const orgGroup = document.getElementById("orgSelectGroup");
+          const orgSelect = document.getElementById("organization");
+          const orgLink = document.getElementById("orgLink");
+          const createUserForm = document.getElementById("createUserForm");
+          const createOrgLink = document.getElementById("createOrgLink");
+          const manageUsersLink = document.getElementById("manageUsersLink");
+          const profileEl = document.getElementById("userProfile");
+
+          if (profileEl && data.username) {
+            profileEl.textContent = data.username;
+          }
+
+          if (orgLink)
+            orgLink.style.display = data.isAdmin ? "inline-block" : "none";
+          if (createOrgLink)
+            createOrgLink.style.display = data.isAdmin
+              ? "inline-block"
+              : "none";
+          if (manageUsersLink)
+            manageUsersLink.style.display = data.isOrgAdmin
+              ? "inline-block"
+              : "none";
+
+          if (!data.isAdmin && !data.isOrgAdmin) {
+            alert("You don't have permission to create users.");
+            window.location.href = `${basePath}/`;
+            return;
+          }
+
+          if (data.isAdmin) {
+            if (orgGroup) orgGroup.style.display = "block";
+            if (orgSelect) orgSelect.setAttribute("required", "");
+
+            fetch(`${basePath}/api/organizations`)
+              .then((r) => r.json())
+              .then((orgs) => {
+                if (orgSelect) {
+                  orgSelect.innerHTML =
+                    '<option value="">Select an organization</option>';
+                  if (orgs && orgs.length > 0) {
+                    orgs.forEach((o) => {
+                      const opt = document.createElement("option");
+                      opt.value = o._id;
+                      opt.textContent = o.name;
+                      orgSelect.append(opt);
+                    });
+                  } else {
+                    orgSelect.innerHTML =
+                      '<option value="">No organizations available</option>';
+                  }
+                }
+              })
+              .catch(() => {
+                if (orgSelect)
+                  orgSelect.innerHTML =
+                    '<option value="">Failed to load organizations</option>';
+              });
+          } else if (data.isOrgAdmin) {
+            if (orgGroup) orgGroup.style.display = "none";
+            if (orgSelect) {
+              orgSelect.removeAttribute("name");
+              orgSelect.removeAttribute("required");
+            }
+
+            if (data.organizationId && createUserForm) {
+              let hiddenInput = createUserForm.querySelector(
+                'input[name="organizationId"]'
+              );
+              if (!hiddenInput) {
+                hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "organizationId";
+                createUserForm.appendChild(hiddenInput);
+              }
+              hiddenInput.value = data.organizationId;
+            } else if (!data.organizationId) {
+              alert(
+                "Error: Organization Admin does not have an assigned organization."
+              );
+              const submitButton = createUserForm.querySelector(
+                'button[type="submit"]'
+              );
+              if (submitButton) submitButton.disabled = true;
+              messageDisplay.textContent =
+                "Cannot create user: Your account is not assigned to an organization.";
+              messageDisplay.className = "message error";
+              messageDisplay.style.display = "block";
+            }
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching session or org data:", err);
+          messageDisplay.textContent =
+            "Error loading page setup. Please try again.";
+          messageDisplay.className = "message error";
+          messageDisplay.style.display = "block";
+        });
+
+      // --- Mobile Menu Toggle Logic ---
+      const menuToggle = document.querySelector(".menu-toggle");
+      const navbarLinks = document.getElementById("navbar-links");
+      const menuIcon = document.getElementById("menu-icon");
+      const closeIcon = document.getElementById("close-icon");
+
+      if (menuToggle) {
+        menuToggle.addEventListener("click", () => {
+          navbarLinks.classList.toggle("active");
+          const isActive = navbarLinks.classList.contains("active");
+          menuIcon.style.display = isActive ? "none" : "block";
+          closeIcon.style.display = isActive ? "block" : "none";
+        });
+      }
+    </script>
+  </body>
+</html>
